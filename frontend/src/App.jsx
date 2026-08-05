@@ -4,7 +4,6 @@ import PsychographicSliders from './PsychographicSliders';
 import CharacterWebMatrix from './CharacterWebMatrix';
 import Login from './Login';
 import Sidebar from './Sidebar';
-import BarcodeScanner from './BarcodeScanner';
 import MyLibrary from './MyLibrary';
 import Collections from './Collections';
 import SavedPages from './SavedPages';
@@ -22,7 +21,6 @@ function App() {
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
-  const [isScanning, setIsScanning] = useState(false);
   const [isAddingManually, setIsAddingManually] = useState(false);
   const [activeGlobalView, setActiveGlobalView] = useState('Discovery');
   const [theme, setTheme] = useState(() => localStorage.getItem('novelflow_theme') || 'system');
@@ -114,36 +112,6 @@ function App() {
     fetchBooks();
   };
 
-  const handleScanSuccess = (decodedText) => {
-    setIsScanning(false);
-    setSearchQuery(decodedText);
-
-    // We execute search directly
-    setIsSearching(true);
-    setLoading(true);
-    setError(null);
-    fetch(`/api/books/search?query=${encodeURIComponent(decodedText.trim())}`)
-      .then((res) => {
-        if (!res.ok) throw new Error('Search failed on backend server.');
-        return res.json();
-      })
-      .then((data) => {
-        setBooks(data);
-        if (data.length > 0) {
-          setSelectedBook(data[0]);
-        } else {
-          setSelectedBook(null);
-        }
-        setIsSearching(false);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message);
-        setIsSearching(false);
-        setLoading(false);
-      });
-  };
-
   const handleManualAddSuccess = (newBook) => {
     setIsAddingManually(false);
     setSearchQuery('');
@@ -204,13 +172,6 @@ function App() {
               <div className="logo-text">NovelFlow</div>
             </div>
 
-            {isScanning && (
-              <BarcodeScanner
-                onScanSuccess={handleScanSuccess}
-                onClose={() => setIsScanning(false)}
-              />
-            )}
-
             <div className="user-profile-widget">
               <div className="user-avatar">{user.fullName ? user.fullName.charAt(0) : 'U'}</div>
               <div className="user-info">
@@ -233,11 +194,6 @@ function App() {
                   if (e.key === 'Enter') handleSearch();
                 }}
               />
-              <button type="button" className="btn-scan" onClick={() => setIsScanning(true)} title="Scan ISBN Barcode">
-                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M4 7V4h3 M20 7V4h-3 M4 17v3h3 M20 17v3h-3 M9 8v8 M15 8v8 M12 8v8" />
-                </svg>
-              </button>
               <button type="button" className="btn-add-manually" onClick={() => setIsAddingManually(v => !v)} title="Add Book Manually" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', padding: '0 8px', color: 'var(--text-light)' }}>
                 ➕
               </button>
@@ -275,7 +231,6 @@ function App() {
                 <div className="empty-state-mini" style={{ textAlign: 'center', padding: '2rem 1rem' }}>
                   <p style={{ marginBottom: '1.5rem', color: 'var(--text-light)', fontSize: '0.95rem' }}>No results found for "{searchQuery}".</p>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                     <button className="btn-primary" onClick={() => setIsScanning(true)} style={{ width: '100%', padding: '0.5rem', fontSize: '0.9rem' }}>📷 Scan ISBN Barcode</button>
                      <button type="button" onClick={() => setIsAddingManually(true)} style={{ width: '100%', padding: '0.5rem', fontSize: '0.9rem', background: 'transparent', border: '1px solid var(--border-color)', color: 'var(--text)', borderRadius: '6px', cursor: 'pointer' }}>➕ Add Manually</button>
                   </div>
                 </div>
