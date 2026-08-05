@@ -10,6 +10,131 @@
   text-align: left;
 }
 
+/* Global Navigation Sidebar */
+.global-sidebar {
+  width: 250px;
+  background: white;
+  /* Adjust if dark mode */
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 24px 20px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.global-sidebar-header {
+  margin-bottom: 40px;
+  display: flex;
+  align-items: center;
+}
+
+.app-logo {
+  font-family: var(--heading);
+  font-size: 24px;
+  color: var(--accent);
+  /* Or Primary text color */
+}
+
+.logo-text-bold {
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.logo-text-light {
+  font-weight: 300;
+  color: #3b82f6;
+}
+
+.global-sidebar-nav-groups {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.nav-group-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: #9ca3af;
+  margin: 0 0 12px 10px;
+  font-weight: 600;
+}
+
+.nav-group-items {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: #4b5563;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.nav-item:hover {
+  background: rgba(0, 0, 0, 0.03);
+  color: #111827;
+}
+
+.nav-item.active {
+  background: #f1f5f9;
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.nav-icon {
+  width: 20px;
+  height: 20px;
+  opacity: 0.6;
+}
+
+.nav-item.active .nav-icon {
+  opacity: 1;
+}
+
+.global-sidebar-footer {
+  margin-top: auto;
+  border-top: 1px solid var(--border);
+  padding-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sync-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 14px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #10b981;
+  border-radius: 50%;
+}
+
+.status-label {
+  font-size: 13px;
+  color: #10b981;
+  font-weight: 500;
+}
+
+/* Existing Sidebar (Catalog list) */
 .sidebar {
   width: 320px;
   border-right: 1px solid var(--border);
@@ -384,6 +509,12 @@
   background: rgba(16, 185, 129, 0.15);
   border-color: #10b981;
   color: #34d399;
+}
+
+.status-btn.active.queue {
+  background: rgba(168, 85, 247, 0.15);
+  border-color: #a855f7;
+  color: #c084fc;
 }
 
 .status-btn.active.dnf {
@@ -1232,4 +1363,234 @@
     opacity: 1;
     transform: translateY(0);
   }
+
+  .search-container {
+    display: flex;
+    gap: 8px;
+    position: relative;
+    width: 100%;
+  }
+
+  .search-input {
+    flex-grow: 1;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text-h);
+    font-family: inherit;
+    font-size: 14px;
+  }
+
+  .btn-scan {
+    background: var(--social-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-scan:hover {
+    background: var(--hover-bg);
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .btn-search {
+    padding: 0 16px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+
+  .btn-search:hover {
+    opacity: 0.9;
+  }
+
+  .btn-clear-search {
+    position: absolute;
+    right: 100px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text);
+    cursor: pointer;
+  }
+
+  /* Scanner Overlay */
+  .scanner-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .scanner-modal {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    width: 90%;
+    max-width: 500px;
+    padding: 24px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .scanner-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 12px;
+  }
+
+  .scanner-header h3 {
+    margin: 0;
+    font-size: 18px;
+    color: var(--text-h);
+  }
+
+  .btn-close-scanner {
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: var(--text);
+    cursor: pointer;
+    padding: 4px;
+  }
+
+  .btn-close-scanner:hover {
+    color: #ef4444;
+  }
+
+  .scanner-hint {
+    text-align: center;
+    font-size: 13px;
+    color: var(--text);
+    margin: 0;
+  }
+
+/* ── Manual Book Panel (inline in sidebar) ─────────────── */
+.manual-book-panel {
+  border: 1px solid var(--accent-border);
+  border-radius: 10px;
+  background: var(--accent-bg);
+  overflow: hidden;
+}
+
+.manual-book-panel-inner {
+  padding: 14px 16px;
+}
+
+.manual-book-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+/* ── Settings Page ─────────────────────────────────────── */
+.settings-panel {
+  max-width: 700px;
+  padding: 2rem;
+}
+
+.settings-section {
+  background: var(--social-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.settings-section-title {
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text);
+  font-weight: 600;
+  margin: 0 0 20px 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.settings-row-label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settings-label {
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--text-h);
+}
+
+.settings-desc {
+  font-size: 13px;
+  color: var(--text);
+}
+
+/* ── Theme Toggle Button Group ─────────────────────────── */
+.theme-toggle-group {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.theme-toggle-btn {
+  padding: 10px 20px;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-right: 1px solid var(--border);
+  font-family: var(--sans);
+}
+
+.theme-toggle-btn:last-child {
+  border-right: none;
+}
+
+.theme-toggle-btn:hover {
+  background: var(--code-bg);
+  color: var(--text-h);
+}
+
+.theme-toggle-btn.active {
+  background: var(--accent);
+  color: white;
+  font-weight: 600;
 }

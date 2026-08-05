@@ -139,6 +139,13 @@ export default function PsychographicSliders({ bookId, userId, onTelemetryUpdate
             </button>
             <button
               type="button"
+              className={`status-btn ${readingStatus === 'Queue' ? 'active queue' : ''}`}
+              onClick={() => setReadingStatus('Queue')}
+            >
+              Queue
+            </button>
+            <button
+              type="button"
               className={`status-btn ${readingStatus === 'DNF' ? 'active dnf' : ''}`}
               onClick={() => setReadingStatus('DNF')}
             >

@@ -17,7 +17,6 @@ public class ReadingTelemetry {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "book_master_id", nullable = false)
     private BookMaster bookMaster;

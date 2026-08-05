@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-export default function CharacterWebMatrix({ bookId }) {
+export default function CharacterWebMatrix({ bookId, synopsis }) {
     const [graphData, setGraphData] = useState({ nodes: [], links: [] });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -355,6 +355,14 @@ export default function CharacterWebMatrix({ bookId }) {
             {/* Left Graph Panel */}
             <div className="graph-card">
                 <h3>Character Network Map</h3>
+                {synopsis && (
+                    <div style={{ marginBottom: '1.5rem', background: 'var(--bg)', padding: '1rem', borderRadius: '8px', borderLeft: '4px solid var(--accent)' }}>
+                        <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem', color: 'var(--text-h)' }}>Book Synopsis</h4>
+                        <p style={{ fontSize: '0.85rem', color: 'var(--text)', margin: 0, fontStyle: 'italic', lineHeight: '1.5' }}>
+                            "{synopsis}"
+                        </p>
+                    </div>
+                )}
                 {nodes.length === 0 ? (
                     <div className="empty-state">
                         <p>No characters cataloged for this book yet.</p>

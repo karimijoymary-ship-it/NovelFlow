@@ -49,6 +49,11 @@ public class BookController {
         return bookMasterRepository.findAll();
     }
 
+    @GetMapping("/user-library")
+    public List<ReadingTelemetry> getUserLibrary(@RequestParam String userId) {
+        return readingTelemetryRepository.findByUserUserId(userId);
+    }
+
     @GetMapping("/search")
     @Transactional
     public List<BookMaster> searchBooks(@RequestParam String query) {
@@ -437,6 +442,51 @@ public class BookController {
                 });
     }
 
+    @PostMapping("/manual")
+    public ResponseEntity<BookMaster> saveManualBook(@RequestBody ManualBookRequest request) {
+        String uuid = UUID.randomUUID().toString();
+        String masterId = "manual_" + uuid;
+
+        BookMaster bm = new BookMaster();
+        bm.setBookMasterId(masterId);
+        bm.setOriginalAuthor(request.getAuthor() != null && !request.getAuthor().trim().isEmpty() ? request.getAuthor()
+                : "Unknown Author");
+        bm.setOriginalReleaseYear(request.getReleaseYear());
+        bm.setCalculatedAverageRating(0.0);
+        bm.setSynopsis(request.getSynopsis() != null ? request.getSynopsis() : "");
+        BookMaster savedBm = bookMasterRepository.save(bm);
+
+        if (savedBm.getSynopsis() != null && !savedBm.getSynopsis().trim().isEmpty()) {
+            characterExtractorService.extractAndSaveCharacters(savedBm, savedBm.getSynopsis());
+        }
+
+        BookEdition edition = new BookEdition();
+        edition.setEditionId("edition_manual_" + uuid);
+        edition.setBookMaster(savedBm);
+        edition.setLanguageTag(request.getLanguageTag() != null && !request.getLanguageTag().trim().isEmpty()
+                ? request.getLanguageTag()
+                : "en");
+        edition.setTitle(
+                request.getTitle() != null && !request.getTitle().trim().isEmpty() ? request.getTitle() : "Untitled");
+
+        String isbn = request.getIsbnBarcode();
+        if (isbn == null || isbn.trim().isEmpty()) {
+            int hashCode = Math.abs(uuid.hashCode());
+            isbn = String.format("999%010d", hashCode);
+            if (isbn.length() > 13)
+                isbn = isbn.substring(0, 13);
+        }
+        edition.setIsbnBarcode(isbn);
+
+        edition = bookEditionRepository.save(edition);
+
+        List<BookEdition> editions = new ArrayList<>();
+        editions.add(edition);
+        savedBm.setEditions(editions);
+
+        return ResponseEntity.ok(savedBm);
+    }
+
     @PostMapping("/{id}/telemetry")
     public ResponseEntity<BookMaster> saveTelemetry(@PathVariable String id, @RequestBody TelemetryRequest request) {
         String userId = request.getUserId();
@@ -446,13 +496,22 @@ public class BookController {
 
         Optional<BookMaster> bookOpt = bookMasterRepository.findById(id);
         if (bookOpt.isEmpty()) {
+            System.err.println("saveTelemetry FAILED: Book not found for id: " + id);
             return ResponseEntity.notFound().build();
         }
         BookMaster book = bookOpt.get();
 
         Optional<User> userOpt = userRepository.findById(userId);
         if (userOpt.isEmpty()) {
-            return ResponseEntity.badRequest().build();
+            System.err.println("saveTelemetry: User not found for userId: " + userId + ". Auto-recovering session...");
+            User recoveredUser = new User();
+            recoveredUser.setUserId(userId);
+            recoveredUser.setFullName("Recovered Session");
+            recoveredUser.setEmail(userId + "@recovered.local");
+            recoveredUser.setAcademicStream("Recovered");
+            recoveredUser.setPasswordHash("recovered");
+            userRepository.save(recoveredUser);
+            userOpt = Optional.of(recoveredUser);
         }
         User user = userOpt.get();
 
@@ -541,6 +600,63 @@ public class BookController {
 
         public void setDnfReason(String dnfReason) {
             this.dnfReason = dnfReason;
+        }
+    }
+
+    public static class ManualBookRequest {
+        private String title;
+        private String author;
+        private Integer releaseYear;
+        private String languageTag;
+        private String isbnBarcode;
+        private String synopsis;
+
+        public String getTitle() {
+            return title;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        public String getAuthor() {
+            return author;
+        }
+
+        public void setAuthor(String author) {
+            this.author = author;
+        }
+
+        public Integer getReleaseYear() {
+            return releaseYear;
+        }
+
+        public void setReleaseYear(Integer releaseYear) {
+            this.releaseYear = releaseYear;
+        }
+
+        public String getLanguageTag() {
+            return languageTag;
+        }
+
+        public void setLanguageTag(String languageTag) {
+            this.languageTag = languageTag;
+        }
+
+        public String getIsbnBarcode() {
+            return isbnBarcode;
+        }
+
+        public void setIsbnBarcode(String isbnBarcode) {
+            this.isbnBarcode = isbnBarcode;
+        }
+
+        public String getSynopsis() {
+            return synopsis;
+        }
+
+        public void setSynopsis(String synopsis) {
+            this.synopsis = synopsis;
         }
     }
 }

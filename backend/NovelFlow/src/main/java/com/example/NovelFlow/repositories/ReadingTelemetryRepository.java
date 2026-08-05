@@ -12,4 +12,6 @@ public interface ReadingTelemetryRepository extends JpaRepository<ReadingTelemet
     List<ReadingTelemetry> findByBookMasterBookMasterId(String bookMasterId);
 
     Optional<ReadingTelemetry> findByBookMasterBookMasterIdAndUserUserId(String bookMasterId, String userId);
+
+    List<ReadingTelemetry> findByUserUserId(String userId);
 }
