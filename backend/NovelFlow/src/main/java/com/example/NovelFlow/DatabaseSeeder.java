@@ -68,7 +68,7 @@ public class DatabaseSeeder implements CommandLineRunner {
         admin.setRole("admin");
         userRepository.save(admin);
 
-        if (bookMasterRepository.count() == 0) {
+        if (bookMasterRepository.count() == 0 || !bookMasterRepository.existsById("book_11")) {
             seedBooksAndTelemetry(admin);
         }
 
@@ -194,7 +194,167 @@ public class DatabaseSeeder implements CommandLineRunner {
         createRelationship("rel_3_2", winstonChar, obrienChar, "Adversary");
         createRelationship("rel_3_3", obrienChar, winstonChar, "Mentor");
 
-        // 5. Seed Telemetry
+        // 5. Seed Book 11: Blossoms of the Savannah (Henry Ole Kulet)
+        if (!bookMasterRepository.existsById("book_11")) {
+            BookMaster blossoms = new BookMaster();
+            blossoms.setBookMasterId("book_11");
+            blossoms.setOriginalAuthor("Henry Ole Kulet");
+            blossoms.setOriginalReleaseYear(2008);
+            blossoms.setCalculatedAverageRating(4.6);
+            blossoms.setSynopsis("After their father loses his job in the city, sisters Resian and Taiyo relocate with their family from Nakuru to the rural Maasai community of Nasila. There, the girls are caught between their own ambitions and the community's expectations, especially the demand that they undergo female circumcision before marriage. Resian resists fiercely, facing danger and betrayal as she fights to control her own future.");
+            blossoms.setDnaComplexity(82);
+            blossoms.setDnaDarkness(78);
+            blossoms.setDnaPacing(85);
+            blossoms.setDnaRomance(40);
+            blossoms.setDnaWorldBuild(88);
+            blossoms.setCustomTags("#KenyanLit, #ComingOfAge, #CulturalTraditions, #MaasaiHeritage");
+            blossoms.setThematicElements("Gender Roles, Tradition vs Modernity, Female Autonomy, Resilience");
+            blossoms = bookMasterRepository.save(blossoms);
+
+            BookEdition blossomsEd = new BookEdition();
+            blossomsEd.setEditionId("edition_11_en");
+            blossomsEd.setBookMaster(blossoms);
+            blossomsEd.setLanguageTag("en");
+            blossomsEd.setTitle("Blossoms of the Savannah");
+            blossomsEd.setIsbnBarcode("9789966734006");
+            bookEditionRepository.save(blossomsEd);
+
+            CharacterNode resian = createCharacter("char_11_1", blossoms, "Resian", "Protagonist");
+            CharacterNode taiyo = createCharacter("char_11_2", blossoms, "Taiyo", "Supporting");
+            CharacterNode parsimei = createCharacter("char_11_3", blossoms, "Parsimei Ole Kaelo", "Supporting");
+            CharacterNode mama = createCharacter("char_11_4", blossoms, "Mama Milanoi", "Supporting");
+            CharacterNode oloisudori = createCharacter("char_11_5", blossoms, "Oloisudori Loonkiya", "Antagonist");
+            CharacterNode olarinkoi = createCharacter("char_11_6", blossoms, "Olarinkoi", "Antagonist");
+            CharacterNode nabaru = createCharacter("char_11_7", blossoms, "Nabaru", "Ally");
+
+            createRelationship("rel_11_1", resian, taiyo, "Family / Sister");
+            createRelationship("rel_11_2", parsimei, resian, "Family / Parent");
+            createRelationship("rel_11_3", mama, resian, "Family / Parent");
+            createRelationship("rel_11_4", oloisudori, resian, "Adversary");
+            createRelationship("rel_11_5", olarinkoi, resian, "Adversary");
+            createRelationship("rel_11_6", nabaru, resian, "Ally / Mentor");
+        }
+
+        // 6. Seed Book 12: Kigogo (Pauline Kea)
+        if (!bookMasterRepository.existsById("book_12")) {
+            BookMaster kigogo = new BookMaster();
+            kigogo.setBookMasterId("book_12");
+            kigogo.setOriginalAuthor("Pauline Kea");
+            kigogo.setOriginalReleaseYear(2018);
+            kigogo.setCalculatedAverageRating(4.7);
+            kigogo.setSynopsis("Set in the fictional state of Sagamoyo, this Swahili play exposes the corruption and abuse of power under its authoritarian ruler, Majoka. As Sagamoyo prepares for independence celebrations, young craftsmen and activists led by Sudi and Tunu begin to challenge the regime's exploitation of ordinary citizens, exposing cover-ups, staged deaths, and the government's neglect of the people it claims to serve.");
+            kigogo.setDnaComplexity(85);
+            kigogo.setDnaDarkness(88);
+            kigogo.setDnaPacing(82);
+            kigogo.setDnaRomance(30);
+            kigogo.setDnaWorldBuild(85);
+            kigogo.setCustomTags("#SwahiliPlay, #PoliticalSatire, #AfricanDrama, #AntiCorruption");
+            kigogo.setThematicElements("Authoritarianism, Corruption, Civic Resistance, Social Justice");
+            kigogo = bookMasterRepository.save(kigogo);
+
+            BookEdition kigogoEd = new BookEdition();
+            kigogoEd.setEditionId("edition_12_sw");
+            kigogoEd.setBookMaster(kigogo);
+            kigogoEd.setLanguageTag("sw");
+            kigogoEd.setTitle("Kigogo");
+            kigogoEd.setIsbnBarcode("9789966011121");
+            bookEditionRepository.save(kigogoEd);
+
+            CharacterNode majoka = createCharacter("char_12_1", kigogo, "Majoka", "Antagonist");
+            CharacterNode tunu = createCharacter("char_12_2", kigogo, "Tunu", "Protagonist");
+            CharacterNode sudi = createCharacter("char_12_3", kigogo, "Sudi", "Protagonist");
+            CharacterNode ashua = createCharacter("char_12_4", kigogo, "Ashua", "Supporting");
+            CharacterNode kenga = createCharacter("char_12_5", kigogo, "Kenga", "Antagonist");
+            CharacterNode ngurumo = createCharacter("char_12_6", kigogo, "Ngurumo", "Supporting");
+            CharacterNode boza = createCharacter("char_12_7", kigogo, "Boza", "Supporting");
+            CharacterNode mamapima = createCharacter("char_12_8", kigogo, "Mamapima", "Supporting");
+
+            createRelationship("rel_12_1", tunu, majoka, "Adversary");
+            createRelationship("rel_12_2", sudi, tunu, "Ally / Activist Partner");
+            createRelationship("rel_12_3", kenga, majoka, "Ally / Enforcer");
+            createRelationship("rel_12_4", kenga, sudi, "Adversary");
+            createRelationship("rel_12_5", sudi, ashua, "Spouse");
+        }
+
+        // 7. Seed Book 13: Chozi la Heri (Assumpta K. Matei)
+        if (!bookMasterRepository.existsById("book_13")) {
+            BookMaster chozi = new BookMaster();
+            chozi.setBookMasterId("book_13");
+            chozi.setOriginalAuthor("Assumpta K. Matei");
+            chozi.setOriginalReleaseYear(2018);
+            chozi.setCalculatedAverageRating(4.6);
+            chozi.setSynopsis("Set against the backdrop of Kenya's post-election ethnic violence, the novel follows siblings Umulkheri, Dick, and Mwaliko after they are torn apart from their family amid the chaos, each enduring hardship and hoping to be reunited. Interwoven with their story is Ridhaa's own journey through personal loss and grief. The narrative moves between tragedy and hope, ultimately tracing how broken families and a fractured community find healing and reconciliation.");
+            chozi.setDnaComplexity(90);
+            chozi.setDnaDarkness(85);
+            chozi.setDnaPacing(75);
+            chozi.setDnaRomance(35);
+            chozi.setDnaWorldBuild(86);
+            chozi.setCustomTags("#KiswahiliNovel, #PostElectionConflict, #FamilyReconciliation, #HopeAndHealing");
+            chozi.setThematicElements("Ethnic Harmony, Dislocation & Healing, Loss & Redemption, Family Bonds");
+            chozi = bookMasterRepository.save(chozi);
+
+            BookEdition choziEd = new BookEdition();
+            choziEd.setEditionId("edition_13_sw");
+            choziEd.setBookMaster(chozi);
+            choziEd.setLanguageTag("sw");
+            choziEd.setTitle("Chozi la Heri");
+            choziEd.setIsbnBarcode("9789966349811");
+            bookEditionRepository.save(choziEd);
+
+            CharacterNode ridhaa = createCharacter("char_13_1", chozi, "Ridhaa", "Protagonist");
+            CharacterNode umu = createCharacter("char_13_2", chozi, "Umulkheri (Umu)", "Protagonist");
+            CharacterNode dick = createCharacter("char_13_3", chozi, "Dick", "Supporting");
+            CharacterNode mwaliko = createCharacter("char_13_4", chozi, "Mwaliko", "Supporting");
+            CharacterNode lunga = createCharacter("char_13_5", chozi, "Lunga", "Supporting");
+            CharacterNode neema = createCharacter("char_13_6", chozi, "Neema", "Supporting");
+            CharacterNode chanda = createCharacter("char_13_7", chozi, "Chandachema", "Supporting");
+            CharacterNode zohali = createCharacter("char_13_8", chozi, "Zohali", "Supporting");
+
+            createRelationship("rel_13_1", umu, dick, "Family / Sibling");
+            createRelationship("rel_13_2", umu, mwaliko, "Family / Sibling");
+            createRelationship("rel_13_3", lunga, umu, "Family / Parent");
+            createRelationship("rel_13_4", neema, mwaliko, "Family / Adoptive Parent");
+        }
+
+        // 8. Seed Book 14: The Pearl (John Steinbeck)
+        if (!bookMasterRepository.existsById("book_14")) {
+            BookMaster pearl = new BookMaster();
+            pearl.setBookMasterId("book_14");
+            pearl.setOriginalAuthor("John Steinbeck");
+            pearl.setOriginalReleaseYear(1947);
+            pearl.setCalculatedAverageRating(4.4);
+            pearl.setSynopsis("In a poor fishing village near La Paz, Mexico, the pearl diver Kino lives simply and contentedly with his wife Juana and infant son Coyotito. When Coyotito is stung by a scorpion, Kino dives in desperate hope of finding a pearl valuable enough to pay for medical care, and discovers an enormous, extraordinary pearl. What first seems like the answer to the family's prayers instead draws out greed, violence, and betrayal from those around them, dragging the family toward devastating loss.");
+            pearl.setDnaComplexity(84);
+            pearl.setDnaDarkness(92);
+            pearl.setDnaPacing(88);
+            pearl.setDnaRomance(60);
+            pearl.setDnaWorldBuild(75);
+            pearl.setCustomTags("#NovellaParable, #GreedAndTragedy, #SteinbeckClassic, #ColonialExploitation");
+            pearl.setThematicElements("Corrupting Influence of Wealth, Family Devotion, Human Greed, Illusion of Hope");
+            pearl = bookMasterRepository.save(pearl);
+
+            BookEdition pearlEd = new BookEdition();
+            pearlEd.setEditionId("edition_14_en");
+            pearlEd.setBookMaster(pearl);
+            pearlEd.setLanguageTag("en");
+            pearlEd.setTitle("The Pearl");
+            pearlEd.setIsbnBarcode("9780140177374");
+            bookEditionRepository.save(pearlEd);
+
+            CharacterNode kino = createCharacter("char_14_1", pearl, "Kino", "Protagonist");
+            CharacterNode juana = createCharacter("char_14_2", pearl, "Juana", "Supporting");
+            CharacterNode coyotito = createCharacter("char_14_3", pearl, "Coyotito", "Supporting");
+            CharacterNode doctor = createCharacter("char_14_4", pearl, "The Doctor", "Antagonist");
+            CharacterNode dealers = createCharacter("char_14_5", pearl, "The Pearl Dealers", "Antagonist");
+            CharacterNode trackers = createCharacter("char_14_6", pearl, "The Trackers", "Antagonist");
+
+            createRelationship("rel_14_1", kino, juana, "Spouse / Family");
+            createRelationship("rel_14_2", kino, coyotito, "Family / Parent");
+            createRelationship("rel_14_3", kino, doctor, "Adversary");
+            createRelationship("rel_14_4", kino, trackers, "Adversary");
+        }
+
+        // 9. Seed Telemetry
         createTelemetry("tel_1", user, gatsby, 4.5, "Reading", null, 120);
         createTelemetry("tel_2", user, dune, 4.8, "Completed", null, 800);
         createTelemetry("tel_3", user, orwell1984, 4.2, "DNF", "Too bleak and depressing to finish.", 150);
