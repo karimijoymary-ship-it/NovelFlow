@@ -25,6 +25,7 @@ public class DatabaseSeeder implements CommandLineRunner {
     private final BookSetRepository bookSetRepository;
     private final BookSetItemRepository bookSetItemRepository;
     private final BookSetCommentRepository bookSetCommentRepository;
+    private final BookReviewRepository bookReviewRepository;
 
     public DatabaseSeeder(UserRepository userRepository,
             BookMasterRepository bookMasterRepository,
@@ -36,7 +37,8 @@ public class DatabaseSeeder implements CommandLineRunner {
             CharacterExtractorService characterExtractorService,
             BookSetRepository bookSetRepository,
             BookSetItemRepository bookSetItemRepository,
-            BookSetCommentRepository bookSetCommentRepository) {
+            BookSetCommentRepository bookSetCommentRepository,
+            BookReviewRepository bookReviewRepository) {
         this.userRepository = userRepository;
         this.bookMasterRepository = bookMasterRepository;
         this.bookEditionRepository = bookEditionRepository;
@@ -48,6 +50,7 @@ public class DatabaseSeeder implements CommandLineRunner {
         this.bookSetRepository = bookSetRepository;
         this.bookSetItemRepository = bookSetItemRepository;
         this.bookSetCommentRepository = bookSetCommentRepository;
+        this.bookReviewRepository = bookReviewRepository;
     }
 
     @Override
@@ -375,6 +378,49 @@ public class DatabaseSeeder implements CommandLineRunner {
         createTelemetry("tel_1", user, gatsby, 4.5, "Reading", null, 120);
         createTelemetry("tel_2", user, dune, 4.8, "Completed", null, 800);
         createTelemetry("tel_3", user, orwell1984, 4.2, "DNF", "Too bleak and depressing to finish.", 150);
+
+        // 10. Seed Sample Community Reviews
+        if (bookReviewRepository.count() == 0) {
+            BookMaster blossoms = bookMasterRepository.findById("book_11").orElse(null);
+            if (blossoms != null) {
+                createReview("rev_11_1", blossoms, "Faith Wanjiku", "Comparative Literature", 5.0,
+                    "Masterpiece on resilience & female autonomy",
+                    "Ole Kulet masterfully weaves Maasai tradition with the internal struggles of Resian and Taiyo. Resian's courage against forced marriage is inspiring.", 14);
+                createReview("rev_11_2", blossoms, "David Kiptoo", "African Studies", 4.5,
+                    "Crucial KCSE set text with rich cultural themes",
+                    "The contrast between urban Nakuru and rural Nasila highlights the tension between modernity and cultural expectations.", 8);
+            }
+
+            BookMaster kigogo = bookMasterRepository.findById("book_12").orElse(null);
+            if (kigogo != null) {
+                createReview("rev_12_1", kigogo, "Amani Juma", "Swahili & Drama", 5.0,
+                    "Tahakiki kabambe ya uongozi na haki za wananchi",
+                    "Tamthilia hii inafichua uwazi uozo wa uongozi wa Majoka katika jimbo la Sagamoyo. Mhusika Tunu anaonyesha ujasiri mkubwa wa kutafuta haki.", 19);
+                createReview("rev_12_2", kigogo, "Mercy Nyambura", "Political Science", 4.8,
+                    "Powerful allegory for governance in modern Africa",
+                    "Pauline Kea uses satire effectively. Sudi and Tunu's resistance movements show the power of peaceful civic action.", 11);
+            }
+
+            BookMaster chozi = bookMasterRepository.findById("book_13").orElse(null);
+            if (chozi != null) {
+                createReview("rev_13_1", chozi, "Hassan Mwangi", "Kiswahili Literature", 5.0,
+                    "Riwaya yenye hisia kali za matumaini na utengano",
+                    "Safari ya Umulkheri, Dick, na Mwaliko inagusa moyo sana. Mwandishi Assumpta Matei anafundisha umuhimu wa msamaha na amani.", 16);
+            }
+
+            BookMaster pearl = bookMasterRepository.findById("book_14").orElse(null);
+            if (pearl != null) {
+                createReview("rev_14_1", pearl, "Daniel Vance", "Classic Fiction", 4.5,
+                    "A haunting parable about wealth and human desire",
+                    "Steinbeck's prose in The Pearl is concise yet profound. Kino's descent from hope to tragedy illustrates how greed distorts pure intentions.", 12);
+            }
+
+            if (gatsby != null) {
+                createReview("rev_1_1", gatsby, "Alice Reader", "Comparative Literature", 5.0,
+                    "Unmatched critique of the Jazz Age American Dream",
+                    "The atmospheric symbolism of the green light and the eyes of Dr. T.J. Eckleburg makes Gatsby an timeless masterpiece.", 24);
+            }
+        }
     }
 
     private void seedSampleCollections() {
@@ -562,5 +608,19 @@ public class DatabaseSeeder implements CommandLineRunner {
         tel.setPagesCompleted(pages);
         tel.setSyncedAt(LocalDateTime.now());
         readingTelemetryRepository.save(tel);
+    }
+
+    private BookReview createReview(String id, BookMaster book, String name, String stream, Double rating, String title, String text, Integer helpful) {
+        BookReview rev = new BookReview();
+        rev.setReviewId(id);
+        rev.setBookMaster(book);
+        rev.setReviewerName(name);
+        rev.setReviewerStream(stream);
+        rev.setRating(rating);
+        rev.setReviewTitle(title);
+        rev.setReviewText(text);
+        rev.setHelpfulCount(helpful);
+        rev.setCreatedAt(LocalDateTime.now().minusDays((long) (Math.random() * 5 + 1)));
+        return bookReviewRepository.save(rev);
     }
 }

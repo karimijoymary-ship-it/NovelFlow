@@ -7,7 +7,8 @@ function Sidebar({ activeView, onViewChange, user, onLogout }) {
       items: [
         { id: 'Discovery', label: 'Discovery', icon: <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /> },
         { id: 'Character Map', label: 'Character Map', icon: <path d="M16 21v-2a4 4 0 0 0-4-4H5c-1 0-2-1-2-2V5c0-1 1-2 2-2h14c1 0 2 1 2 2v6" /> },
-        { id: 'Book Analytics', label: 'Book Analytics', icon: <><path d="M3 3v18h18" /><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3" /></> }
+        { id: 'Book Analytics', label: 'Book Analytics', icon: <><path d="M3 3v18h18" /><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3" /></> },
+        { id: 'Community Reviews', label: 'Community Reviews', icon: <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /> }
       ]
     },
     {

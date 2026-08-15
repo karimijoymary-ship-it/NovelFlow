@@ -10,6 +10,7 @@ import ManualBookForm from './ManualBookForm';
 import BookAnalyticsView from './BookAnalyticsView';
 import AdminDashboardView from './AdminDashboardView';
 import Collections from './Collections';
+import CommunityReviewsView from './CommunityReviewsView';
 import { getApiUrl } from './apiConfig';
 
 // Apply saved theme on load
@@ -302,12 +303,17 @@ function App() {
                     <div className="author-by">by <strong>{selectedBook.originalAuthor}</strong></div>
                     <span className="release-year">Originally Published: {selectedBook.originalReleaseYear}</span>
                   </div>
-                  <div className="book-header-rating">
+                  <div
+                    className="book-header-rating"
+                    onClick={() => setActiveGlobalView('Community Reviews')}
+                    style={{ cursor: 'pointer' }}
+                    title="Click to view community reviews and submit a rating"
+                  >
                     <div className="rating-big-value">
                       {selectedBook.calculatedAverageRating ? selectedBook.calculatedAverageRating.toFixed(1) : '0.0'}
                       <span>★</span>
                     </div>
-                    <div className="rating-label">Calculated Community Rating</div>
+                    <div className="rating-label">Community Rating (Click for Reviews)</div>
                   </div>
                 </header>
 
@@ -418,6 +424,27 @@ function App() {
             <div className="empty-state">
               <h2>Book Analytics</h2>
               <p>Please select a book from the Discovery view first.</p>
+            </div>
+          )}
+        </div>
+      ) : activeGlobalView === 'Community Reviews' ? (
+        <div className="main-content">
+          {selectedBook ? (
+            <div className="animate-fade-in" style={{ padding: '0 2rem' }}>
+              <header className="book-header" style={{ borderBottom: 'none', paddingBottom: '20px' }}>
+                <div className="book-header-left">
+                  <h1>Community Rating & Reviews</h1>
+                  <div className="author-by">for <strong>{getBookTitle(selectedBook)}</strong></div>
+                </div>
+              </header>
+              <section className="tab-panel">
+                <CommunityReviewsView book={selectedBook} currentUser={user} />
+              </section>
+            </div>
+          ) : (
+            <div className="empty-state">
+              <h2>Community Rating & Reviews</h2>
+              <p>Please select a book from the catalog first to view and write community reviews.</p>
             </div>
           )}
         </div>

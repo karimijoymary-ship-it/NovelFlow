@@ -35,6 +35,7 @@ public class BookController {
     private final RestTemplate restTemplate;
     private final CharacterExtractorService characterExtractorService;
     private final CharacterNodeRepository characterNodeRepository;
+    private final BookReviewRepository bookReviewRepository;
 
     public BookController(BookMasterRepository bookMasterRepository,
             BookEditionRepository bookEditionRepository,
@@ -42,7 +43,8 @@ public class BookController {
             UserRepository userRepository,
             RestTemplate restTemplate,
             CharacterExtractorService characterExtractorService,
-            CharacterNodeRepository characterNodeRepository) {
+            CharacterNodeRepository characterNodeRepository,
+            BookReviewRepository bookReviewRepository) {
         this.bookMasterRepository = bookMasterRepository;
         this.bookEditionRepository = bookEditionRepository;
         this.readingTelemetryRepository = readingTelemetryRepository;
@@ -50,6 +52,7 @@ public class BookController {
         this.restTemplate = restTemplate;
         this.characterExtractorService = characterExtractorService;
         this.characterNodeRepository = characterNodeRepository;
+        this.bookReviewRepository = bookReviewRepository;
     }
 
     @GetMapping
@@ -869,5 +872,83 @@ public class BookController {
             public String getDescription() { return description; }
             public void setDescription(String description) { this.description = description; }
         }
+    }
+
+    // ----------------------------------------------------
+    // COMMUNITY REVIEWS & RATINGS ENDPOINTS
+    // ----------------------------------------------------
+
+    @GetMapping("/{bookId}/reviews")
+    public ResponseEntity<List<BookReview>> getBookReviews(@PathVariable String bookId) {
+        List<BookReview> reviews = bookReviewRepository.findByBookMasterBookMasterIdOrderByCreatedAtDesc(bookId);
+        return ResponseEntity.ok(reviews);
+    }
+
+    @PostMapping("/{bookId}/reviews")
+    @Transactional
+    public ResponseEntity<?> addBookReview(@PathVariable String bookId, @RequestBody ReviewRequest request) {
+        Optional<BookMaster> bookOpt = bookMasterRepository.findById(bookId);
+        if (bookOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        BookMaster book = bookOpt.get();
+
+        BookReview review = new BookReview();
+        review.setReviewId(UUID.randomUUID().toString());
+        review.setBookMaster(book);
+        review.setReviewerName(request.getReviewerName() != null && !request.getReviewerName().isBlank() ? request.getReviewerName() : "Anonymous Reader");
+        review.setReviewerStream(request.getReviewerStream() != null && !request.getReviewerStream().isBlank() ? request.getReviewerStream() : "General Literature");
+        review.setRating(request.getRating() != null ? Math.min(5.0, Math.max(1.0, request.getRating())) : 5.0);
+        review.setReviewTitle(request.getReviewTitle() != null ? request.getReviewTitle() : "Community Review");
+        review.setReviewText(request.getReviewText() != null ? request.getReviewText() : "");
+        review.setHelpfulCount(0);
+        review.setCreatedAt(LocalDateTime.now());
+
+        BookReview savedReview = bookReviewRepository.save(review);
+
+        // Recalculate average rating for the book
+        List<BookReview> allReviews = bookReviewRepository.findByBookMasterBookMasterId(bookId);
+        if (!allReviews.isEmpty()) {
+            double avg = allReviews.stream().mapToDouble(BookReview::getRating).average().orElse(book.getCalculatedAverageRating());
+            book.setCalculatedAverageRating(Math.round(avg * 10.0) / 10.0);
+            bookMasterRepository.save(book);
+        }
+
+        return ResponseEntity.ok(savedReview);
+    }
+
+    @PutMapping("/reviews/{reviewId}/helpful")
+    public ResponseEntity<?> markReviewHelpful(@PathVariable String reviewId) {
+        Optional<BookReview> reviewOpt = bookReviewRepository.findById(reviewId);
+        if (reviewOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        BookReview review = reviewOpt.get();
+        review.setHelpfulCount(review.getHelpfulCount() + 1);
+        bookReviewRepository.save(review);
+        return ResponseEntity.ok(review);
+    }
+
+    public static class ReviewRequest {
+        private String reviewerName;
+        private String reviewerStream;
+        private Double rating;
+        private String reviewTitle;
+        private String reviewText;
+
+        public String getReviewerName() { return reviewerName; }
+        public void setReviewerName(String reviewerName) { this.reviewerName = reviewerName; }
+
+        public String getReviewerStream() { return reviewerStream; }
+        public void setReviewerStream(String reviewerStream) { this.reviewerStream = reviewerStream; }
+
+        public Double getRating() { return rating; }
+        public void setRating(Double rating) { this.rating = rating; }
+
+        public String getReviewTitle() { return reviewTitle; }
+        public void setReviewTitle(String reviewTitle) { this.reviewTitle = reviewTitle; }
+
+        public String getReviewText() { return reviewText; }
+        public void setReviewText(String reviewText) { this.reviewText = reviewText; }
     }
 }
