@@ -1,0 +1,159 @@
+[
+  {
+    "id": 1,
+    "title": "Petals of Blood",
+    "author": "Ngũgĩ wa Thiong'o",
+    "country": "Kenya",
+    "genre": "Literary Fiction",
+    "publishedYear": 1977,
+    "synopsis": "Set in the rural village of Ilmorog, the novel unravels a mysterious arson attack that kills three prominent, corrupt businessmen. Through the police interrogation of four primary suspects, the narrative explores post-independence disillusionment, capitalism, and class struggle in post-colonial Kenya.",
+    "characters": [
+      { "name": "Godfrey Munira", "role": "Protagonist", "description": "The local schoolheadmaster who becomes obsessed with Wanja; driven to religious fanaticism." },
+      { "name": "Wanja", "role": "Supporting", "description": "A resilient former barmaid and granddaughter of village elder Nyakinyua; loved by both Munira and Karega." },
+      { "name": "Abdulla", "role": "Supporting", "description": "A disabled Mau Mau veteran and shopkeeper; acts as a protective companion to Wanja and a father figure to young Joseph." },
+      { "name": "Karega", "role": "Supporting", "description": "A radicalized former teaching assistant and trade union organizer; ex-lover of Munira's late sister Mukami, and Wanja's true love." }
+    ]
+  },
+  {
+    "id": 2,
+    "title": "Dust",
+    "author": "Yvonne Adhiambo Owuor",
+    "country": "Kenya",
+    "genre": "Literary Fiction",
+    "publishedYear": 2014,
+    "synopsis": "Sparked by the police shooting of Odidi Oganda in Nairobi, his sister Ajany and father Nyipir bring his body back to their remote Northern Kenya home. Odidi's murder unearths decades of suppressed national violence and family secrets dating back through Mau Mau uprisings and a shocking 1969 political assassination.",
+    "characters": [
+      { "name": "Odidi Oganda", "role": "Catalyst", "description": "A brilliant engineer turned fugitive whose death sets the story in motion; son of Nyipir and Akai." },
+      { "name": "Ajany Oganda", "role": "Protagonist", "description": "An artist living in Brazil who returns to Kenya to mourn her brother Odidi and uncover the truth behind his murder." },
+      { "name": "Nyipir Oganda", "role": "Supporting", "description": "Ex-policeman and traumatized father; husband to Akai, bound by secrets from colonial and post-colonial conflicts." },
+      { "name": "Akai Lokorijom", "role": "Supporting", "description": "The mercurial mother of Odidi and Ajany; harbors complex ties to a missing British colonial officer, Hugh Bolton." },
+      { "name": "Isaiah Bolton", "role": "Supporting", "description": "An Englishman who arrives in Kenya searching for his long-lost father, Hugh Bolton, intersecting with the Oganda family." }
+    ]
+  },
+  {
+    "id": 3,
+    "title": "Kintu",
+    "author": "Jennifer Nansubuga Makumbi",
+    "country": "Uganda",
+    "genre": "Literary Fiction",
+    "publishedYear": 2014,
+    "synopsis": "An epic spanning from 1750 to modern-day Uganda, tracing a centuries-old curse placed on Kintu Kidda—the governor of Buganda province—following the tragic death of his adopted son. The novel weaves across generations as his descendants struggle with trauma, mental illness, and identity.",
+    "characters": [
+      { "name": "Kintu Kidda", "role": "Protagonist", "description": "18th-century Ppookino (governor); husband to twin sisters Babirye and Nnakato; accidentally triggers the ancestral curse." },
+      { "name": "Nnakato & Babirye", "role": "Supporting", "description": "Twin wives of Kintu; Nnakato is Kintu's favorite but struggles with childlessness, while Babirye bears his children." },
+      { "name": "Kalema", "role": "Supporting", "description": "Kintu's adopted son whose tragic death induces the ancestral curse." },
+      { "name": "Modern Descendants (Kamu Kintu, Suubi, Miisi, Kanani)", "role": "Supporting", "description": "Descendants spread across modern Uganda who are linked by generational trauma and converge for a clan cleansing ritual." }
+    ]
+  },
+  {
+    "id": 4,
+    "title": "Paradise",
+    "author": "Abdulrazak Gurnah",
+    "country": "Tanzania",
+    "genre": "Literary Fiction",
+    "publishedYear": 1994,
+    "synopsis": "Set in pre-WWI East Africa, the story follows Yusuf, a 12-year-old boy handed over to a wealthy Arab trader to pay off his father's debts. Yusuf grows up navigating trading caravans through the African interior, witnessing colonial encroachment and forbidden love.",
+    "characters": [
+      { "name": "Yusuf", "role": "Protagonist", "description": "The observant, handsome young protagonist bonded into servitude." },
+      { "name": "Uncle Aziz", "role": "Supporting", "description": "Wealthy Arab merchant who holds Yusuf's debt-bond; master to Yusuf and Khalil." },
+      { "name": "Khalil", "role": "Supporting", "description": "An older servant in Aziz's store who becomes Yusuf's elder brother figure and guide." },
+      { "name": "Zuleikha", "role": "Supporting", "description": "Aziz's sickly wife who develops an obsessive attraction toward Yusuf." },
+      { "name": "Amina", "role": "Supporting", "description": "A young concubine held in Aziz's walled garden; Yusuf's secret love interest." }
+    ]
+  },
+  {
+    "id": 5,
+    "title": "The Shadow King",
+    "author": "Maaza Mengiste",
+    "country": "Ethiopia",
+    "genre": "Historical Fiction",
+    "publishedYear": 2019,
+    "synopsis": "Set during the 1935 Italian invasion of Ethiopia, the novel highlights the critical role of women soldiers. When Emperor Haile Selassie flees into exile, a household maid named Hirut helps create a fake emperor to rally Ethiopian resistance fighters against Mussolini's army.",
+    "characters": [
+      { "name": "Hirut", "role": "Protagonist", "description": "An orphaned servant girl who becomes a fierce soldier and guardian of the \"Shadow King\"." },
+      { "name": "Kidane", "role": "Supporting", "description": "Ethiopian military officer and Hirut's master; husband to Aster; patriotic yet abusive toward Hirut." },
+      { "name": "Aster", "role": "Supporting", "description": "Kidane's noble wife who rebels against traditional gender roles to organize female fighters." },
+      { "name": "Minim (The Shadow King)", "role": "Supporting", "description": "A gentle peasant soldier resembling Haile Selassie, used by Hirut and Aster as a rallying symbol." },
+      { "name": "Ettore Navarra", "role": "Supporting", "description": "An Italian army photographer torn between duty to fascism and his Jewish heritage." }
+    ]
+  },
+  {
+    "id": 6,
+    "title": "Things Fall Apart",
+    "author": "Chinua Achebe",
+    "country": "Nigeria",
+    "genre": "Literary Fiction",
+    "publishedYear": 1958,
+    "synopsis": "Chronicling the life of Okonkwo, a proud Igbo warrior in pre-colonial Nigeria, the story depicts traditional village life and its catastrophic disintegration following the arrival of British colonialists and Christian missionaries.",
+    "characters": [
+      { "name": "Okonkwo", "role": "Protagonist", "description": "Protagonist and wrestling champion driven by fear of appearing weak like his father, Unoka." },
+      { "name": "Ikemefuna", "role": "Supporting", "description": "A captive boy given to the village who lives with Okonkwo's family, becoming a surrogate son to Okonkwo and brother to Nwoye." },
+      { "name": "Nwoye", "role": "Supporting", "description": "Okonkwo's eldest son who rejects his father's harsh expectations and converts to Christianity." },
+      { "name": "Ezinma", "role": "Supporting", "description": "Okonkwo's favorite daughter with his second wife Ekwefi; Okonkwo wishes she were a boy due to her spirit." },
+      { "name": "Obierika", "role": "Supporting", "description": "Okonkwo's loyal best friend and voice of reason." }
+    ]
+  },
+  {
+    "id": 7,
+    "title": "A Grain of Wheat",
+    "author": "Ngũgĩ wa Thiong'o",
+    "country": "Kenya",
+    "genre": "Literary Fiction",
+    "publishedYear": 1967,
+    "synopsis": "Set in Kenya on the eve of Uhuru (Independence) in 1963, villagers in Thabai reflect on their actions during the Mau Mau Emergency, unearthing secrets of heroism, cowardice, and betrayal regarding the execution of resistance hero Kihika.",
+    "characters": [
+      { "name": "Mugo", "role": "Protagonist", "description": "Reclusive villager hailed as a hero for attempting to save a woman, but harboring a destructive secret about Kihika." },
+      { "name": "Kihika", "role": "Supporting", "description": "Deceased Mau Mau guerrilla leader whose martyrdom overshadows the entire village." },
+      { "name": "Gikonyo", "role": "Supporting", "description": "A skilled carpenter and former detainee; husband to Mumbi, struggling with her infidelity during his imprisonment." },
+      { "name": "Mumbi", "role": "Supporting", "description": "Sister of Kihika and wife of Gikonyo; bore a child with Gikonyo's rival Karanja while Gikonyo was detained." },
+      { "name": "Karanja", "role": "Antagonist", "description": "British home guard collaborator; obsessed with Mumbi and rival to Gikonyo." }
+    ]
+  },
+  {
+    "id": 8,
+    "title": "Unbowed",
+    "author": "Wangari Maathai",
+    "country": "Kenya",
+    "genre": "Memoir / Non-Fiction",
+    "publishedYear": 2006,
+    "synopsis": "A non-fiction memoir by Nobel Peace Prize winner Wangari Maathai detailing her journey from rural Kenya to becoming an international environmental activist, politician, and founder of the Green Belt Movement.",
+    "characters": [
+      { "name": "Wangari Maathai", "role": "Protagonist / Author", "description": "Author and activist who fought for democracy, human rights, and environmental conservation in Kenya." },
+      { "name": "Muta Nyiro & Wanjiru", "role": "Supporting", "description": "Her supportive parents who prioritized her formal education in Nyeri." },
+      { "name": "The Green Belt Movement Women", "role": "Supporting", "description": "The network of rural Kenyan women who partnered with Maathai to plant tens of millions of trees." },
+      { "name": "Kenyan State Authorities", "role": "Antagonist", "description": "Political opposition faced by Maathai during her peaceful demonstrations against forest land grabs." }
+    ]
+  },
+  {
+    "id": 9,
+    "title": "The Dragonfly Sea",
+    "author": "Yvonne Adhiambo Owuor",
+    "country": "Kenya",
+    "genre": "Literary Fiction",
+    "publishedYear": 2019,
+    "synopsis": "Growing up on Pate Island off the Swahili coast, young Ayaana's world expands when genetic testing links her to Zheng He's 15th-century Chinese maritime fleet. She embarks on a journey to China and Turkey, exploring themes of identity, migration, and homecoming.",
+    "characters": [
+      { "name": "Ayaana", "role": "Protagonist", "description": "The young protagonist deeply connected to the Indian Ocean and Swahili heritage." },
+      { "name": "Munira", "role": "Supporting", "description": "Ayaana's resilient mother who raises her on Pate Island before marrying Muhidin." },
+      { "name": "Muhidin", "role": "Supporting", "description": "An elderly sailor who becomes Ayaana's father figure/mentor and later Munira's husband." },
+      { "name": "Koray", "role": "Supporting", "description": "A Turkish student Ayaana meets in China; his family's shady dealings lead to her disillusionment." },
+      { "name": "Lai Jin (Nahodha Jamal)", "role": "Supporting", "description": "A Chinese ship captain who facilitates Ayaana's travel to China." }
+    ]
+  },
+  {
+    "id": 10,
+    "title": "The River Between",
+    "author": "Ngũgĩ wa Thiong'o",
+    "country": "Kenya",
+    "genre": "Literary Fiction",
+    "publishedYear": 1965,
+    "synopsis": "Set in two opposing Gikuyu ridges (Makuyu and Kameno) separated by the Honia River, the novel details the cultural rift caused by Christian missionaries and traditional preservation, centered around a young leader trying to unify his people.",
+    "characters": [
+      { "name": "Waiyaki", "role": "Protagonist", "description": "Young idealist leader from Kameno who seeks to unite both ridges through Western education while honoring Gikuyu traditions." },
+      { "name": "Nyambura", "role": "Supporting", "description": "Daughter of the fanatical Christian convert Joshua; falls in love with Waiyaki across religious divides." },
+      { "name": "Muthoni", "role": "Supporting", "description": "Nyambura's younger sister who seeks both Christian faith and traditional Gikuyu circumcision, resulting in her tragic death." },
+      { "name": "Chege", "role": "Supporting", "description": "Waiyaki's father, a traditional seer who passes ancient prophecies down to his son." },
+      { "name": "Kabonyi", "role": "Antagonist", "description": "Rival elder who leads the traditionalist council and seeks to destroy Waiyaki." }
+    ]
+  }
+]

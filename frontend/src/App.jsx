@@ -5,9 +5,12 @@ import CharacterWebMatrix from './CharacterWebMatrix';
 import Login from './Login';
 import Sidebar from './Sidebar';
 import MyLibrary from './MyLibrary';
-import Collections from './Collections';
 import SavedPages from './SavedPages';
 import ManualBookForm from './ManualBookForm';
+import BookAnalyticsView from './BookAnalyticsView';
+import AdminDashboardView from './AdminDashboardView';
+import Collections from './Collections';
+import { getApiUrl } from './apiConfig';
 
 // Apply saved theme on load
 const savedTheme = localStorage.getItem('novelflow_theme') || 'system';
@@ -49,9 +52,10 @@ function App() {
   };
 
   // Fetch all books
-  const fetchBooks = () => {
+  const fetchBooks = (retryCount = 0) => {
     setLoading(true);
-    fetch('/api/books')
+    setError(null);
+    fetch(getApiUrl('/api/books'))
       .then((res) => {
         if (!res.ok) throw new Error('Failed to fetch books from the backend.');
         return res.json();
@@ -68,11 +72,18 @@ function App() {
             return data[0];
           });
         }
+        setError(null);
         setLoading(false);
       })
       .catch((err) => {
-        setError(err.message);
-        setLoading(false);
+        if (retryCount < 3) {
+          setTimeout(() => {
+            fetchBooks(retryCount + 1);
+          }, 2500);
+        } else {
+          setError(err.message);
+          setLoading(false);
+        }
       });
   };
 
@@ -85,7 +96,7 @@ function App() {
     setIsSearching(true);
     setLoading(true);
     setError(null);
-    fetch(`/api/books/search?query=${encodeURIComponent(trimmed)}`)
+    fetch(getApiUrl(`/api/books/search?query=${encodeURIComponent(trimmed)}`))
       .then((res) => {
         if (!res.ok) throw new Error('Search failed on backend server.');
         return res.json();
@@ -160,7 +171,7 @@ function App() {
 
   return (
     <div className="app-container">
-      <Sidebar activeView={activeGlobalView} onViewChange={setActiveGlobalView} />
+      <Sidebar activeView={activeGlobalView} onViewChange={setActiveGlobalView} user={user} onLogout={handleLogout} />
 
       {activeGlobalView === 'Discovery' ? (
         <React.Fragment>
@@ -219,7 +230,28 @@ function App() {
               </div>
             )}
 
-            {error && <div className="error-message">{error}</div>}
+            {error && (
+              <div className="error-message" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
+                <span>{error}</span>
+                <button
+                  type="button"
+                  onClick={() => fetchBooks(3)}
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    border: '1px solid rgba(255, 255, 255, 0.4)',
+                    color: '#fff',
+                    padding: '4px 10px',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontSize: '0.82rem',
+                    fontWeight: 600,
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  🔄 Retry
+                </button>
+              </div>
+            )}
 
             <div className="book-list">
               {isSearching ? (
@@ -283,9 +315,35 @@ function App() {
                 {selectedBook.synopsis && (
                   <section className="synopsis-section animate-fade-in" style={{ padding: '1.5rem', background: 'var(--social-bg)', borderRadius: '12px', border: '1px solid var(--border)', marginBottom: '24px' }}>
                     <h4 style={{ margin: '0 0 10px 0', color: 'var(--text-h)' }}>Synopsis</h4>
-                    <p style={{ color: 'var(--text)', fontSize: '0.95rem', lineHeight: '1.6', margin: 0 }}>
+                    <p style={{ color: 'var(--text)', fontSize: '0.95rem', lineHeight: '1.6', margin: '0 0 16px 0' }}>
                       {selectedBook.synopsis}
                     </p>
+
+                    {/* Active Narrative Themes & Custom Tags */}
+                    {(selectedBook.thematicElements || selectedBook.customTags) && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', paddingTop: '12px', borderTop: '1px dashed var(--border)' }}>
+                        {selectedBook.thematicElements && (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: '0.78rem', color: '#c084fc', fontWeight: 600, textTransform: 'uppercase' }}>🎭 Narrative Themes:</span>
+                            {selectedBook.thematicElements.split(',').map((t, idx) => (
+                              <span key={idx} style={{ background: 'rgba(168, 85, 247, 0.15)', border: '1px solid rgba(168, 85, 247, 0.4)', color: '#c084fc', padding: '3px 10px', borderRadius: '12px', fontSize: '0.82rem', fontWeight: 600 }}>
+                                🎭 {t.trim()}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        {selectedBook.customTags && (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: '0.78rem', color: 'var(--accent)', fontWeight: 600, textTransform: 'uppercase' }}>🏷️ Micro Tags:</span>
+                            {selectedBook.customTags.split(',').map((t, idx) => (
+                              <span key={idx} style={{ background: 'var(--accent-bg)', border: '1px solid var(--accent-border)', color: 'var(--accent)', padding: '3px 10px', borderRadius: '12px', fontSize: '0.82rem', fontWeight: 600 }}>
+                                {t.trim().startsWith('#') ? t.trim() : `#${t.trim()}`}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </section>
                 )}
 
@@ -332,7 +390,7 @@ function App() {
                 </div>
               </header>
               <section className="tab-panel" style={{ marginTop: '20px' }}>
-                <CharacterWebMatrix bookId={selectedBook.bookMasterId} synopsis={selectedBook.synopsis} />
+                <CharacterWebMatrix bookId={selectedBook.bookMasterId} synopsis={selectedBook.synopsis} thematicElements={selectedBook.thematicElements} customTags={selectedBook.customTags} />
               </section>
             </div>
           ) : (
@@ -341,6 +399,31 @@ function App() {
               <p>Please select a book from the Discovery view first to map its characters.</p>
             </div>
           )}
+        </div>
+      ) : activeGlobalView === 'Book Analytics' ? (
+        <div className="main-content">
+          {selectedBook ? (
+            <div className="animate-fade-in" style={{ padding: '0 2rem' }}>
+              <header className="book-header" style={{ borderBottom: 'none', paddingBottom: '20px' }}>
+                <div className="book-header-left">
+                  <h1>Book Analytics</h1>
+                  <div className="author-by">for <strong>{getBookTitle(selectedBook)}</strong></div>
+                </div>
+              </header>
+              <section className="tab-panel">
+                <BookAnalyticsView book={selectedBook} onBookUpdated={setSelectedBook} />
+              </section>
+            </div>
+          ) : (
+            <div className="empty-state">
+              <h2>Book Analytics</h2>
+              <p>Please select a book from the Discovery view first.</p>
+            </div>
+          )}
+        </div>
+      ) : activeGlobalView === 'System Administration' ? (
+        <div className="main-content">
+           <AdminDashboardView />
         </div>
       ) : activeGlobalView === 'Reading Stats' ? (
         <div className="main-content">

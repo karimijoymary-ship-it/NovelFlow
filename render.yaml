@@ -1,0 +1,35 @@
+services:
+  # --------------------------------------------------
+  # 1. Spring Boot Backend Service
+  # --------------------------------------------------
+  - type: web
+    name: novelflow-backend
+    runtime: docker
+    dockerfilePath: ./backend/NovelFlow/Dockerfile
+    dockerContext: ./backend/NovelFlow
+    plan: free
+    region: oregon
+    envVars:
+      - key: PORT
+        value: 8080
+
+  # --------------------------------------------------
+  # 2. Vite React Frontend Static Site
+  # --------------------------------------------------
+  - type: web
+    name: novelflow-frontend
+    runtime: static
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: ./frontend/dist
+    plan: free
+    region: oregon
+    envVars:
+      - key: VITE_API_BASE_URL
+        fromService:
+          type: web
+          name: novelflow-backend
+          property: url
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

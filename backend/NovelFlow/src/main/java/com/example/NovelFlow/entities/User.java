@@ -25,6 +25,9 @@ public class User {
     @Column(name = "password_hash", length = 100, nullable = false)
     private String passwordHash;
 
+    @Column(name = "role", length = 20)
+    private String role = "reader";
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<ReadingTelemetry> telemetryRecords;
 
@@ -67,5 +70,13 @@ public class User {
 
     public void setPasswordHash(String passwordHash) {
         this.passwordHash = passwordHash;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 }

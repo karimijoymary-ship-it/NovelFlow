@@ -17,6 +17,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.core.io.ClassPathResource;
+import java.io.InputStream;
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/books")
@@ -29,19 +34,22 @@ public class BookController {
     private final UserRepository userRepository;
     private final RestTemplate restTemplate;
     private final CharacterExtractorService characterExtractorService;
+    private final CharacterNodeRepository characterNodeRepository;
 
     public BookController(BookMasterRepository bookMasterRepository,
             BookEditionRepository bookEditionRepository,
             ReadingTelemetryRepository readingTelemetryRepository,
             UserRepository userRepository,
             RestTemplate restTemplate,
-            CharacterExtractorService characterExtractorService) {
+            CharacterExtractorService characterExtractorService,
+            CharacterNodeRepository characterNodeRepository) {
         this.bookMasterRepository = bookMasterRepository;
         this.bookEditionRepository = bookEditionRepository;
         this.readingTelemetryRepository = readingTelemetryRepository;
         this.userRepository = userRepository;
         this.restTemplate = restTemplate;
         this.characterExtractorService = characterExtractorService;
+        this.characterNodeRepository = characterNodeRepository;
     }
 
     @GetMapping
@@ -228,6 +236,12 @@ public class BookController {
             fetchFromOpenLibrary(trimmedQuery, processedEditions, processedIsbns);
         }
 
+        List<BookMaster> currentResults = bookMasterRepository.searchLocal(trimmedQuery);
+        if (currentResults.isEmpty()) {
+            System.out.println("Executing Handmade API fallback search for query: " + trimmedQuery);
+            fetchFromHandmadeApi(trimmedQuery, processedEditions, processedIsbns);
+        }
+
         // Re-query local database after fetching and saving items from API(s)
         return bookMasterRepository.searchLocal(trimmedQuery);
     }
@@ -409,9 +423,79 @@ public class BookController {
                     }
                 }
             }
-        } catch (Exception ex) {
-            System.err.println("Error calling OpenLibrary API fallback: " + ex.getMessage());
-            ex.printStackTrace();
+        } catch (Exception e) {
+            System.err.println("OpenLibrary Fallback Logic execution failed: " + e.getMessage());
+        }
+    }
+
+    private void fetchFromHandmadeApi(String query, Set<String> processedEditions, Set<String> processedIsbns) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            InputStream is = new ClassPathResource("handmade_fallback.json").getInputStream();
+            List<HandmadeBookDto> handmadeBooks = mapper.readValue(is, new TypeReference<List<HandmadeBookDto>>() {});
+
+            String lowercaseQuery = query.toLowerCase();
+
+            for (HandmadeBookDto dto : handmadeBooks) {
+                if (dto.getTitle().toLowerCase().contains(lowercaseQuery) || dto.getAuthor().toLowerCase().contains(lowercaseQuery)) {
+                    String editionId = "handmade_ed_" + dto.getId();
+                    String masterId = "handmade_" + dto.getId();
+                    
+                    if (processedEditions.contains(editionId) || bookEditionRepository.existsById(editionId)) {
+                        continue;
+                    }
+
+                    processedEditions.add(editionId);
+
+                    BookMaster master = bookMasterRepository.findById(masterId).orElseGet(() -> {
+                        BookMaster bm = new BookMaster();
+                        bm.setBookMasterId(masterId);
+                        bm.setOriginalAuthor(dto.getAuthor());
+                        bm.setOriginalReleaseYear(dto.getPublishedYear());
+                        bm.setCalculatedAverageRating(0.0);
+                        bm.setSynopsis(dto.getSynopsis());
+                        
+                        // Parse country and genre straight into the tags engine
+                        String customTags = dto.getCountry() + ", " + dto.getGenre();
+                        bm.setCustomTags(customTags);
+                        
+                        BookMaster savedBm = bookMasterRepository.save(bm);
+                        
+                        if (dto.getCharacters() != null && !dto.getCharacters().isEmpty()) {
+                            List<CharacterNode> extractedChars = new ArrayList<>();
+                            for (HandmadeBookDto.HandmadeCharacterDto cDto : dto.getCharacters()) {
+                                CharacterNode cNode = new CharacterNode();
+                                cNode.setCharacterId("hm_char_" + UUID.randomUUID().toString().substring(0, 8));
+                                cNode.setBookMaster(savedBm);
+                                cNode.setCharacterName(cDto.getName());
+                                cNode.setThematicArchetype(cDto.getRole());
+                                cNode.setSource("HNNDMADE_API");
+                                extractedChars.add(cNode);
+                            }
+                            characterNodeRepository.saveAll(extractedChars);
+                        }
+                        
+                        return savedBm;
+                    });
+
+                    BookEdition edition = new BookEdition();
+                    edition.setEditionId(editionId);
+                    edition.setBookMaster(master);
+                    edition.setLanguageTag("en");
+                    edition.setTitle(dto.getTitle());
+                    edition.setIsbnBarcode("AUTO_HM_" + dto.getId());
+                    edition = bookEditionRepository.save(edition);
+
+                    if (master.getEditions() == null) {
+                        master.setEditions(new ArrayList<>());
+                    }
+                    if (!master.getEditions().contains(edition)) {
+                        master.getEditions().add(edition);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Handmade API Error: " + e.getMessage());
         }
     }
 
@@ -442,6 +526,29 @@ public class BookController {
                 });
     }
 
+    @GetMapping("/unverified")
+    public ResponseEntity<List<BookMaster>> getUnverifiedBooks() {
+        List<BookMaster> allBooks = bookMasterRepository.findAll();
+        List<BookMaster> unverified = new ArrayList<>();
+        for (BookMaster book : allBooks) {
+            if (book.getIsVerified() != null && !book.getIsVerified()) {
+                unverified.add(book);
+            }
+        }
+        return ResponseEntity.ok(unverified);
+    }
+
+    @PutMapping("/{id}/verify")
+    public ResponseEntity<BookMaster> verifyBook(@PathVariable String id) {
+        Optional<BookMaster> opt = bookMasterRepository.findById(id);
+        if (opt.isPresent()) {
+            BookMaster bm = opt.get();
+            bm.setIsVerified(true);
+            return ResponseEntity.ok(bookMasterRepository.save(bm));
+        }
+        return ResponseEntity.notFound().build();
+    }
+
     @PostMapping("/manual")
     public ResponseEntity<BookMaster> saveManualBook(@RequestBody ManualBookRequest request) {
         String uuid = UUID.randomUUID().toString();
@@ -454,6 +561,7 @@ public class BookController {
         bm.setOriginalReleaseYear(request.getReleaseYear());
         bm.setCalculatedAverageRating(0.0);
         bm.setSynopsis(request.getSynopsis() != null ? request.getSynopsis() : "");
+        bm.setIsVerified(false);
         BookMaster savedBm = bookMasterRepository.save(bm);
 
         if (savedBm.getSynopsis() != null && !savedBm.getSynopsis().trim().isEmpty()) {
@@ -550,6 +658,28 @@ public class BookController {
         } else {
             book.setCalculatedAverageRating(0.0);
         }
+
+        bookMasterRepository.save(book);
+        return ResponseEntity.ok(book);
+    }
+
+    @PutMapping("/{bookId}/dna")
+    @Transactional
+    public ResponseEntity<BookMaster> updateBookDna(@PathVariable String bookId, @RequestBody DnaUpdateRequest request) {
+        Optional<BookMaster> bookOpt = bookMasterRepository.findById(bookId);
+        if (bookOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        BookMaster book = bookOpt.get();
+        if (request.getDnaComplexity() != null) book.setDnaComplexity(request.getDnaComplexity());
+        if (request.getDnaRomance() != null) book.setDnaRomance(request.getDnaRomance());
+        if (request.getDnaDarkness() != null) book.setDnaDarkness(request.getDnaDarkness());
+        if (request.getDnaHumor() != null) book.setDnaHumor(request.getDnaHumor());
+        if (request.getDnaPacing() != null) book.setDnaPacing(request.getDnaPacing());
+        if (request.getDnaWorldBuild() != null) book.setDnaWorldBuild(request.getDnaWorldBuild());
+        if (request.getCustomTags() != null) book.setCustomTags(request.getCustomTags());
+        if (request.getThematicElements() != null) book.setThematicElements(request.getThematicElements());
+        if (request.getCustomThemeScores() != null) book.setCustomThemeScores(request.getCustomThemeScores());
 
         bookMasterRepository.save(book);
         return ResponseEntity.ok(book);
@@ -657,6 +787,87 @@ public class BookController {
 
         public void setSynopsis(String synopsis) {
             this.synopsis = synopsis;
+        }
+    }
+
+    public static class DnaUpdateRequest {
+        private Integer dnaComplexity;
+        private Integer dnaRomance;
+        private Integer dnaDarkness;
+        private Integer dnaHumor;
+        private Integer dnaPacing;
+        private Integer dnaWorldBuild;
+        private String customTags;
+        private String thematicElements;
+        private String customThemeScores;
+
+        public Integer getDnaComplexity() { return dnaComplexity; }
+        public void setDnaComplexity(Integer dnaComplexity) { this.dnaComplexity = dnaComplexity; }
+
+        public Integer getDnaRomance() { return dnaRomance; }
+        public void setDnaRomance(Integer dnaRomance) { this.dnaRomance = dnaRomance; }
+
+        public Integer getDnaDarkness() { return dnaDarkness; }
+        public void setDnaDarkness(Integer dnaDarkness) { this.dnaDarkness = dnaDarkness; }
+
+        public Integer getDnaHumor() { return dnaHumor; }
+        public void setDnaHumor(Integer dnaHumor) { this.dnaHumor = dnaHumor; }
+
+        public Integer getDnaPacing() { return dnaPacing; }
+        public void setDnaPacing(Integer dnaPacing) { this.dnaPacing = dnaPacing; }
+
+        public Integer getDnaWorldBuild() { return dnaWorldBuild; }
+        public void setDnaWorldBuild(Integer dnaWorldBuild) { this.dnaWorldBuild = dnaWorldBuild; }
+
+        public String getCustomTags() { return customTags; }
+        public void setCustomTags(String customTags) { this.customTags = customTags; }
+
+        public String getThematicElements() { return thematicElements; }
+        public void setThematicElements(String thematicElements) { this.thematicElements = thematicElements; }
+
+        public String getCustomThemeScores() { return customThemeScores; }
+        public void setCustomThemeScores(String customThemeScores) { this.customThemeScores = customThemeScores; }
+    }
+
+    public static class HandmadeBookDto {
+        private int id;
+        private String title;
+        private String author;
+        private String country;
+        private String genre;
+        private int publishedYear;
+        private String synopsis;
+        private List<HandmadeCharacterDto> characters;
+
+        // Getters and Setter
+        public int getId() { return id; }
+        public void setId(int id) { this.id = id; }
+        public String getTitle() { return title; }
+        public void setTitle(String title) { this.title = title; }
+        public String getAuthor() { return author; }
+        public void setAuthor(String author) { this.author = author; }
+        public String getCountry() { return country; }
+        public void setCountry(String country) { this.country = country; }
+        public String getGenre() { return genre; }
+        public void setGenre(String genre) { this.genre = genre; }
+        public int getPublishedYear() { return publishedYear; }
+        public void setPublishedYear(int publishedYear) { this.publishedYear = publishedYear; }
+        public String getSynopsis() { return synopsis; }
+        public void setSynopsis(String synopsis) { this.synopsis = synopsis; }
+        public List<HandmadeCharacterDto> getCharacters() { return characters; }
+        public void setCharacters(List<HandmadeCharacterDto> characters) { this.characters = characters; }
+
+        public static class HandmadeCharacterDto {
+            private String name;
+            private String role;
+            private String description;
+
+            public String getName() { return name; }
+            public void setName(String name) { this.name = name; }
+            public String getRole() { return role; }
+            public void setRole(String role) { this.role = role; }
+            public String getDescription() { return description; }
+            public void setDescription(String description) { this.description = description; }
         }
     }
 }

@@ -1,6 +1,6 @@
 #FileLock
-#Wed Aug 05 19:59:06 EAT 2026
-hostName=Kajoy
-id=19fd2dd4a5ef90bf7f626edcaf4acde337ea9778db5
+#Fri Aug 14 22:43:11 EAT 2026
+hostName=Kajoy.mshome.net
+id=1a001ccc38d433124e7acee45d80946ec82da43faa4
 method=file
-server=192.168.56.1\:54373
+server=172.17.208.1\:65395

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { getApiUrl } from './apiConfig';
 
-export default function CharacterWebMatrix({ bookId, synopsis }) {
+export default function CharacterWebMatrix({ bookId, synopsis, thematicElements, customTags }) {
     const [graphData, setGraphData] = useState({ nodes: [], links: [] });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -20,7 +21,7 @@ export default function CharacterWebMatrix({ bookId, synopsis }) {
     const fetchNetwork = () => {
         setLoading(true);
         setError(null);
-        fetch(`/api/books/${bookId}/network`)
+        fetch(getApiUrl(`/api/books/${bookId}/network`))
             .then(res => {
                 if (!res.ok) throw new Error("Failed to load character network.");
                 return res.json();
@@ -57,7 +58,7 @@ export default function CharacterWebMatrix({ bookId, synopsis }) {
         setSubmitting(true);
         setFormMessage(null);
 
-        fetch(`/api/books/${bookId}/relationships`, {
+        fetch(getApiUrl(`/api/books/${bookId}/relationships`), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -94,7 +95,7 @@ export default function CharacterWebMatrix({ bookId, synopsis }) {
         setSubmitting(true);
         setFormMessage(null);
 
-        fetch(`/api/books/${bookId}/characters`, {
+        fetch(getApiUrl(`/api/books/${bookId}/characters`), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -139,7 +140,7 @@ export default function CharacterWebMatrix({ bookId, synopsis }) {
         setSubmitting(true);
         setFormMessage(null);
 
-        fetch(`/api/books/${bookId}/characters/${deleteCharId}`, {
+        fetch(getApiUrl(`/api/books/${bookId}/characters/${deleteCharId}`), {
             method: 'DELETE'
         })
             .then(res => {
@@ -356,11 +357,36 @@ export default function CharacterWebMatrix({ bookId, synopsis }) {
             <div className="graph-card">
                 <h3>Character Network Map</h3>
                 {synopsis && (
-                    <div style={{ marginBottom: '1.5rem', background: 'var(--bg)', padding: '1rem', borderRadius: '8px', borderLeft: '4px solid var(--accent)' }}>
+                    <div style={{ marginBottom: '1rem', background: 'var(--bg)', padding: '1rem', borderRadius: '8px', borderLeft: '4px solid var(--accent)' }}>
                         <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem', color: 'var(--text-h)' }}>Book Synopsis</h4>
                         <p style={{ fontSize: '0.85rem', color: 'var(--text)', margin: 0, fontStyle: 'italic', lineHeight: '1.5' }}>
                             "{synopsis}"
                         </p>
+                    </div>
+                )}
+
+                {(thematicElements || customTags) && (
+                    <div style={{ marginBottom: '1.25rem', padding: '12px', background: 'var(--bg)', borderRadius: '8px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        {thematicElements && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                                <span style={{ fontSize: '0.75rem', color: '#c084fc', fontWeight: 600, textTransform: 'uppercase' }}>🎭 Active Themes:</span>
+                                {thematicElements.split(',').map((t, idx) => (
+                                    <span key={idx} style={{ background: 'rgba(168, 85, 247, 0.15)', border: '1px solid rgba(168, 85, 247, 0.4)', color: '#c084fc', padding: '2px 8px', borderRadius: '10px', fontSize: '0.78rem', fontWeight: 600 }}>
+                                        🎭 {t.trim()}
+                                    </span>
+                                ))}
+                            </div>
+                        )}
+                        {customTags && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                                <span style={{ fontSize: '0.75rem', color: 'var(--accent)', fontWeight: 600, textTransform: 'uppercase' }}>🏷️ Micro Tags:</span>
+                                {customTags.split(',').map((t, idx) => (
+                                    <span key={idx} style={{ background: 'var(--accent-bg)', border: '1px solid var(--accent-border)', color: 'var(--accent)', padding: '2px 8px', borderRadius: '10px', fontSize: '0.78rem', fontWeight: 600 }}>
+                                        {t.trim().startsWith('#') ? t.trim() : `#${t.trim()}`}
+                                    </span>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 )}
                 {nodes.length === 0 ? (

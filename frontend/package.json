@@ -11,8 +11,10 @@
   },
   "dependencies": {
     "html5-qrcode": "^2.3.8",
+    "idb": "^8.0.3",
     "react": "^19.2.6",
-    "react-dom": "^19.2.6"
+    "react-dom": "^19.2.6",
+    "recharts": "^3.10.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

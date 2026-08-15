@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { getApiUrl } from './apiConfig';
 
 export default function PsychographicSliders({ bookId, userId, onTelemetryUpdated }) {
   const [readingStatus, setReadingStatus] = useState('Reading');
@@ -19,7 +20,7 @@ export default function PsychographicSliders({ bookId, userId, onTelemetryUpdate
     setError(null);
     setMessage(null);
 
-    fetch(`/api/books/${bookId}/telemetry?userId=${userId}`)
+    fetch(getApiUrl(`/api/books/${bookId}/telemetry?userId=${userId}`))
       .then((res) => {
         if (!res.ok) throw new Error('Failed to load telemetry data');
         return res.json();
@@ -52,7 +53,7 @@ export default function PsychographicSliders({ bookId, userId, onTelemetryUpdate
       dnfReason: readingStatus === 'DNF' ? dnfReason : null,
     };
 
-    fetch(`/api/books/${bookId}/telemetry`, {
+    fetch(getApiUrl(`/api/books/${bookId}/telemetry`), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
