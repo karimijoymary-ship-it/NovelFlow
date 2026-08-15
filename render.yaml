@@ -1,6 +1,6 @@
 services:
   # --------------------------------------------------
-  # 1. Spring Boot Backend Service
+  # 1. Spring Boot Backend Web Service
   # --------------------------------------------------
   - type: web
     name: novelflow-backend
@@ -16,12 +16,10 @@ services:
   # --------------------------------------------------
   # 2. Vite React Frontend Static Site
   # --------------------------------------------------
-  - type: web
+  - type: static
     name: novelflow-frontend
-    runtime: static
     buildCommand: cd frontend && npm install && npm run build
     staticPublishPath: ./frontend/dist
-    plan: free
     envVars:
       - key: VITE_API_BASE_URL
         fromService:
