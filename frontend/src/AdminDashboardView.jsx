@@ -10,6 +10,8 @@ export default function AdminDashboardView() {
   const [users, setUsers] = useState([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [unverifiedBooks, setUnverifiedBooks] = useState([]);
+  const [allReviews, setAllReviews] = useState([]);
+  const [loadingReviews, setLoadingReviews] = useState(false);
   const [latencyData, setLatencyData] = useState([]);
   const [offlineCounts, setOfflineCounts] = useState({ telemetry: 0, tags: 0 });
 
@@ -19,6 +21,9 @@ export default function AdminDashboardView() {
     }
     if (activeTab === 'catalog') {
       fetchUnverified();
+    }
+    if (activeTab === 'reviews') {
+      fetchAdminReviews();
     }
     if (activeTab === 'infrastructure') {
       fetchLatency(); // initial
@@ -95,6 +100,36 @@ export default function AdminDashboardView() {
     });
   };
 
+  const fetchAdminReviews = () => {
+    setLoadingReviews(true);
+    fetch(getApiUrl('/api/books/all-reviews'))
+      .then(res => res.json())
+      .then(data => {
+        setAllReviews(data || []);
+        setLoadingReviews(false);
+      })
+      .catch(err => {
+        console.error("Failed to fetch reviews", err);
+        setLoadingReviews(false);
+      });
+  };
+
+  const deleteAdminReview = (reviewId, reviewerName) => {
+    if (!window.confirm(`Are you sure you want to delete review by "${reviewerName}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    fetch(getApiUrl(`/api/books/reviews/${reviewId}`), {
+      method: 'DELETE'
+    })
+      .then(res => {
+        if (res.ok) {
+          setAllReviews(prev => prev.filter(r => r.reviewId !== reviewId));
+        }
+      })
+      .catch(console.error);
+  };
+
   const cacheHitData = [
     { source: 'Google', hits: 85, misses: 15 },
     { source: 'OpenLibrary', hits: 55, misses: 45 },
@@ -107,27 +142,33 @@ export default function AdminDashboardView() {
          <div className="book-header-left">
            <h1>System Administration</h1>
            <div className="author-by" style={{ color: 'var(--text-light)', marginTop: '0.5rem' }}>
-             Platform Governance & Infrastructure Monitoring
+             Platform Governance, Community Reviews & Infrastructure Monitoring
            </div>
          </div>
       </header>
 
-      <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
+      <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
          <button 
            onClick={() => setActiveTab('catalog')}
-           style={{ padding: '0.75rem 1.5rem', borderRadius: '8px', border: 'none', cursor: 'pointer', background: activeTab === 'catalog' ? 'var(--primary-color)' : 'var(--social-bg)', color: activeTab === 'catalog' ? '#fff' : 'var(--text)' }}
+           style={{ padding: '0.75rem 1.5rem', borderRadius: '8px', border: 'none', cursor: 'pointer', background: activeTab === 'catalog' ? 'var(--primary-color)' : 'var(--social-bg)', color: activeTab === 'catalog' ? '#fff' : 'var(--text)', fontWeight: 600 }}
          >
            Catalog Governance
          </button>
          <button 
            onClick={() => setActiveTab('community')}
-           style={{ padding: '0.75rem 1.5rem', borderRadius: '8px', border: 'none', cursor: 'pointer', background: activeTab === 'community' ? 'var(--primary-color)' : 'var(--social-bg)', color: activeTab === 'community' ? '#fff' : 'var(--text)' }}
+           style={{ padding: '0.75rem 1.5rem', borderRadius: '8px', border: 'none', cursor: 'pointer', background: activeTab === 'community' ? 'var(--primary-color)' : 'var(--social-bg)', color: activeTab === 'community' ? '#fff' : 'var(--text)', fontWeight: 600 }}
          >
            Community Management
          </button>
          <button 
+           onClick={() => setActiveTab('reviews')}
+           style={{ padding: '0.75rem 1.5rem', borderRadius: '8px', border: 'none', cursor: 'pointer', background: activeTab === 'reviews' ? 'var(--primary-color)' : 'var(--social-bg)', color: activeTab === 'reviews' ? '#fff' : 'var(--text)', fontWeight: 600 }}
+         >
+           💬 Reviews Moderation ({allReviews.length})
+         </button>
+         <button 
            onClick={() => setActiveTab('infrastructure')}
-           style={{ padding: '0.75rem 1.5rem', borderRadius: '8px', border: 'none', cursor: 'pointer', background: activeTab === 'infrastructure' ? 'var(--primary-color)' : 'var(--social-bg)', color: activeTab === 'infrastructure' ? '#fff' : 'var(--text)' }}
+           style={{ padding: '0.75rem 1.5rem', borderRadius: '8px', border: 'none', cursor: 'pointer', background: activeTab === 'infrastructure' ? 'var(--primary-color)' : 'var(--social-bg)', color: activeTab === 'infrastructure' ? '#fff' : 'var(--text)', fontWeight: 600 }}
          >
            Infrastructure Telemetry
          </button>
@@ -138,175 +179,253 @@ export default function AdminDashboardView() {
             <div style={{ background: 'var(--social-bg)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border)' }}>
                <h3 style={{ marginBottom: '1rem' }}>Regional API Fallback Sync</h3>
                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                   <div style={{ background: 'var(--bg)', padding: '1rem', borderRadius: '8px', borderLeft: '4px solid #4CAF50' }}>
-                       <strong>East African Fiction Core</strong>
-                       <p style={{ fontSize: '0.85rem', color: 'var(--text-light)', margin: '0.5rem 0' }}>Endpoint: classpath:handmade_fallback.json</p>
-                       <span style={{ fontSize: '0.8rem', background: '#4CAF50', color: 'white', padding: '2px 6px', borderRadius: '4px' }}>Active & Parsing</span>
+                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                       <span>Google Books API</span>
+                       <span style={{ color: '#4CAF50', fontWeight: 600 }}>Active (Primary)</span>
                    </div>
-                   <div style={{ background: 'var(--bg)', padding: '1rem', borderRadius: '8px', borderLeft: '4px solid #FFC107' }}>
-                       <strong>Manual Book Verification Queue</strong>
-                       <p style={{ fontSize: '0.85rem', color: 'var(--text-light)', margin: '0.5rem 0' }}>{unverifiedBooks.length} items pending moderation</p>
-                       
-                       {unverifiedBooks.length > 0 && (
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '1rem', marginBottom: '1rem', maxHeight: '150px', overflowY: 'auto' }}>
-                              {unverifiedBooks.map(b => (
-                                  <div key={b.bookMasterId} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--social-bg)', padding: '0.5rem', borderRadius: '4px' }}>
-                                      <span style={{ fontSize: '0.8rem' }}><strong>{b.editions && b.editions.length > 0 ? b.editions[0].title : 'Unknown'}</strong> by {b.originalAuthor}</span>
-                                      <button onClick={() => verifyBook(b.bookMasterId)} style={{ padding: '0.2rem 0.5rem', background: '#4CAF50', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.75rem' }}>Approve</button>
-                                  </div>
-                              ))}
-                          </div>
-                       )}
+                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                       <span>OpenLibrary API</span>
+                       <span style={{ color: '#2196F3', fontWeight: 600 }}>Standby (Fallback)</span>
+                   </div>
+                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                       <span>Handmade Local DB</span>
+                       <span style={{ color: '#FFC107', fontWeight: 600 }}>Operational (Seeded)</span>
                    </div>
                </div>
             </div>
+
             <div style={{ background: 'var(--social-bg)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border)' }}>
-               <h3 style={{ marginBottom: '1rem' }}>Character Web Integrity</h3>
-               <p style={{ fontSize: '0.9rem', color: 'var(--text-light)', marginBottom: '1rem' }}>Scanning graph linkages for isolation leaks...</p>
-               <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                   <li style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', background: 'var(--bg)', borderRadius: '6px' }}><span>Orphaned Nodes Detected</span> <strong style={{ color: '#F44336' }}>3</strong></li>
-                   <li style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', background: 'var(--bg)', borderRadius: '6px' }}><span>Dangling Relationships</span> <strong>0</strong></li>
-                   <li style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', background: 'var(--bg)', borderRadius: '6px' }}><span>Cyclic Generation Errors</span> <strong>0</strong></li>
-               </ul>
+               <h3 style={{ marginBottom: '1rem' }}>Unverified User Additions ({unverifiedBooks.length})</h3>
+               {unverifiedBooks.length === 0 ? (
+                   <p style={{ color: 'var(--text-light)', fontSize: '0.9rem' }}>All user-submitted catalog books are verified.</p>
+               ) : (
+                   <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                       {unverifiedBooks.map(b => (
+                           <div key={b.bookMasterId} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg)', padding: '0.75rem 1rem', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                              <div>
+                                  <div style={{ fontWeight: 600 }}>{b.editions?.[0]?.title || b.bookMasterId}</div>
+                                  <div style={{ fontSize: '0.8rem', color: 'var(--text-light)' }}>By {b.originalAuthor} ({b.originalReleaseYear})</div>
+                              </div>
+                              <button onClick={() => verifyBook(b.bookMasterId)} style={{ padding: '0.4rem 0.8rem', background: '#4CAF50', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '0.8rem' }}>
+                                  Verify Book
+                              </button>
+                           </div>
+                       ))}
+                   </div>
+               )}
             </div>
         </div>
       )}
 
       {activeTab === 'community' && (
         <div style={{ background: 'var(--social-bg)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border)' }}>
-           <h3 style={{ marginBottom: '1rem' }}>Role Allocations & Governance</h3>
-           {loadingUsers ? <p>Loading directory...</p> : (
-               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                   <thead>
-                       <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                           <th style={{ padding: '1rem 0.5rem', color: 'var(--text-light)' }}>User ID</th>
-                           <th style={{ padding: '1rem 0.5rem', color: 'var(--text-light)' }}>Name / Email</th>
-                           <th style={{ padding: '1rem 0.5rem', color: 'var(--text-light)' }}>Current Role</th>
-                           <th style={{ padding: '1rem 0.5rem', color: 'var(--text-light)' }}>Actions</th>
-                       </tr>
-                   </thead>
-                   <tbody>
-                       {users.map(u => (
-                           <tr key={u.userId} style={{ borderBottom: '1px solid var(--border)', background: u.role === 'admin' ? 'var(--bg)' : 'transparent' }}>
-                               <td style={{ padding: '1rem 0.5rem', fontFamily: 'var(--mono)', fontSize: '0.8rem' }}>{u.userId.split('-')[0]}</td>
-                               <td style={{ padding: '1rem 0.5rem' }}>
-                                   <strong>{u.fullName}</strong><br/>
-                                   <span style={{ fontSize: '0.8rem', color: 'var(--text-light)' }}>{u.email}</span>
-                               </td>
-                               <td style={{ padding: '1rem 0.5rem' }}>
-                                   <span style={{ 
-                                       padding: '0.25rem 0.5rem', 
-                                       borderRadius: '4px', 
-                                       fontSize: '0.8rem',
-                                       background: u.role === 'admin' ? '#F44336' : u.role === 'contributor' ? '#4CAF50' : '#2196F3',
-                                       color: 'white'
+            <h3 style={{ marginBottom: '1rem' }}>Platform User Directory</h3>
+            {loadingUsers ? (
+                <p>Loading community users...</p>
+            ) : (
+                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
+                    <thead>
+                        <tr style={{ borderBottom: '1px solid var(--border)', color: 'var(--text-light)' }}>
+                            <th style={{ padding: '0.75rem' }}>User ID</th>
+                            <th style={{ padding: '0.75rem' }}>Full Name</th>
+                            <th style={{ padding: '0.75rem' }}>Email</th>
+                            <th style={{ padding: '0.75rem' }}>Academic Stream</th>
+                            <th style={{ padding: '0.75rem' }}>Role</th>
+                            <th style={{ padding: '0.75rem' }}>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {users.map(u => (
+                            <tr key={u.userId} style={{ borderBottom: '1px solid var(--border)' }}>
+                                <td style={{ padding: '0.75rem', fontFamily: 'var(--mono)', fontSize: '0.8rem' }}>{u.userId}</td>
+                                <td style={{ padding: '0.75rem', fontWeight: 600 }}>{u.fullName}</td>
+                                <td style={{ padding: '0.75rem' }}>{u.email}</td>
+                                <td style={{ padding: '0.75rem' }}>{u.academicStream}</td>
+                                <td style={{ padding: '0.75rem' }}>
+                                    <span style={{ 
+                                        padding: '2px 8px', 
+                                        borderRadius: '12px', 
+                                        fontSize: '0.75rem', 
+                                        fontWeight: 600,
+                                        background: u.role === 'admin' ? 'rgba(233, 30, 99, 0.15)' : 'rgba(33, 150, 243, 0.15)',
+                                        color: u.role === 'admin' ? '#E91E63' : '#2196F3'
                                     }}>
-                                       {u.role ? u.role.toUpperCase() : 'USER'}
-                                   </span>
-                               </td>
-                               <td style={{ padding: '1rem 0.5rem', display: 'flex', gap: '0.5rem' }}>
-                                   {u.role !== 'admin' && (
-                                       <>
-                                         {u.role === 'reader' && (
-                                             <button 
-                                                onClick={() => promoteUser(u.userId, 'contributor')}
-                                                style={{ padding: '0.4rem 0.8rem', background: '#4CAF50', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}
-                                             >
-                                                Promote to Contributor
-                                             </button>
-                                         )}
-                                         {u.role === 'contributor' && (
-                                             <button 
-                                                onClick={() => promoteUser(u.userId, 'reader')}
-                                                style={{ padding: '0.4rem 0.8rem', background: '#FF9800', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}
-                                             >
-                                                Demote to Reader
-                                             </button>
-                                         )}
-                                       </>
-                                   )}
-                               </td>
-                           </tr>
-                       ))}
-                   </tbody>
-               </table>
-           )}
+                                        {u.role}
+                                    </span>
+                                </td>
+                                <td style={{ padding: '0.75rem' }}>
+                                    {u.role === 'user' ? (
+                                        <button onClick={() => promoteUser(u.userId, 'admin')} style={{ padding: '4px 8px', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.75rem' }}>
+                                            Promote to Admin
+                                        </button>
+                                    ) : (
+                                        <span style={{ color: 'var(--text-light)', fontSize: '0.8rem' }}>Administrator</span>
+                                    )}
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            )}
+        </div>
+      )}
+
+      {/* 💬 REVIEWS MODERATION TAB */}
+      {activeTab === 'reviews' && (
+        <div style={{ background: 'var(--social-bg)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <div>
+                <h3 style={{ margin: 0 }}>Community Reviews Moderation</h3>
+                <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: 'var(--text-light)' }}>
+                  Inspect, manage, and moderate all user-submitted reviews across books.
+                </p>
+              </div>
+              <span style={{ padding: '4px 12px', background: 'var(--accent-bg)', color: 'var(--accent)', borderRadius: '16px', fontWeight: 600, fontSize: '0.85rem' }}>
+                {allReviews.length} Total Reviews
+              </span>
+            </div>
+
+            {loadingReviews ? (
+              <p>Loading reviews for moderation...</p>
+            ) : allReviews.length === 0 ? (
+              <p style={{ color: 'var(--text-light)' }}>No community reviews found.</p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {allReviews.map(rev => (
+                  <div
+                    key={rev.reviewId}
+                    style={{
+                      background: 'var(--bg)',
+                      borderRadius: '8px',
+                      border: '1px solid var(--border)',
+                      padding: '1rem',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.5rem'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span style={{ fontWeight: 700, color: 'var(--text-h)', fontSize: '0.95rem' }}>
+                          {rev.reviewerName}
+                        </span>
+                        <span style={{ fontSize: '0.78rem', color: 'var(--accent)', background: 'var(--accent-bg)', padding: '2px 8px', borderRadius: '10px' }}>
+                          🎓 {rev.reviewerStream || 'General Reader'}
+                        </span>
+                        <span style={{ fontSize: '0.78rem', color: 'var(--text-light)' }}>
+                          Book: <strong>{rev.bookMaster?.editions?.[0]?.title || rev.bookMaster?.bookMasterId || 'Book'}</strong>
+                        </span>
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <span style={{ color: '#f59e0b', fontWeight: 700, fontSize: '0.9rem' }}>
+                          ★ {rev.rating ? rev.rating.toFixed(1) : '5.0'}
+                        </span>
+                        <span style={{ fontSize: '0.78rem', color: 'var(--text-light)' }}>
+                          👍 {rev.helpfulCount || 0} Helpful
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => deleteAdminReview(rev.reviewId, rev.reviewerName)}
+                          style={{ padding: '4px 10px', background: '#ef4444', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '0.78rem' }}
+                        >
+                          🗑️ Delete Review
+                        </button>
+                      </div>
+                    </div>
+
+                    {rev.reviewTitle && (
+                      <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-h)' }}>
+                        {rev.reviewTitle}
+                      </div>
+                    )}
+
+                    <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text)', lineHeight: 1.4 }}>
+                      {rev.reviewText}
+                    </p>
+
+                    <div style={{ fontSize: '0.72rem', color: 'var(--text-light)', textAlign: 'right' }}>
+                      Submitted on: {new Date(rev.createdAt).toLocaleString()}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
         </div>
       )}
 
       {activeTab === 'infrastructure' && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem' }}>
-            
-            <div style={{ background: 'var(--social-bg)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border)' }}>
-               <h3 style={{ marginBottom: '1rem' }}>External API Gateway Latency (ms)</h3>
-               <div style={{ width: '100%', height: 250 }}>
-                   <ResponsiveContainer>
-                       <LineChart data={latencyData}>
-                           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                           <XAxis dataKey="time" stroke="var(--text-light)" />
-                           <YAxis stroke="var(--text-light)" />
-                           <RechartsTooltip contentStyle={{ background: 'var(--bg)', border: '1px solid var(--border)' }} />
-                           <Legend />
-                           <Line type="monotone" dataKey="Google" stroke="#4285F4" strokeWidth={2} />
-                           <Line type="monotone" dataKey="OpenLibrary" stroke="#34A853" strokeWidth={2} />
-                           <Line type="monotone" dataKey="HandmadeAPI" stroke="#FBBC05" strokeWidth={2} />
-                       </LineChart>
-                   </ResponsiveContainer>
-               </div>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-                <div style={{ background: 'var(--social-bg)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border)' }}>
-                   <h3 style={{ marginBottom: '1rem' }}>Search Cache Hit Rates</h3>
-                   <div style={{ width: '100%', height: 200 }}>
-                       <ResponsiveContainer>
-                           <BarChart data={cacheHitData} layout="vertical">
-                               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                               <XAxis type="number" stroke="var(--text-light)" />
-                               <YAxis dataKey="source" type="category" stroke="var(--text-light)" width={100} />
-                               <RechartsTooltip contentStyle={{ background: 'var(--bg)', border: '1px solid var(--border)' }} />
-                               <Legend />
-                               <Bar dataKey="hits" stackId="a" fill="#4CAF50" />
-                               <Bar dataKey="misses" stackId="a" fill="#F44336" />
-                           </BarChart>
-                       </ResponsiveContainer>
-                   </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+             <div style={{ background: 'var(--social-bg)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                <h3 style={{ marginBottom: '1rem' }}>Backend Microservice Latency Telemetry (ms)</h3>
+                <div style={{ width: '100%', height: 250 }}>
+                    <ResponsiveContainer>
+                        <LineChart data={latencyData}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                            <XAxis dataKey="timestamp" stroke="var(--text-light)" />
+                            <YAxis stroke="var(--text-light)" />
+                            <RechartsTooltip contentStyle={{ background: 'var(--bg)', border: '1px solid var(--border)' }} />
+                            <Legend />
+                            <Line type="monotone" dataKey="Google" stroke="#4285F4" strokeWidth={2} />
+                            <Line type="monotone" dataKey="OpenLibrary" stroke="#34A853" strokeWidth={2} />
+                            <Line type="monotone" dataKey="HandmadeAPI" stroke="#FBBC05" strokeWidth={2} />
+                        </LineChart>
+                    </ResponsiveContainer>
                 </div>
+             </div>
 
-                <div style={{ background: 'var(--social-bg)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border)' }}>
-                   <h3 style={{ marginBottom: '1rem' }}>IndexedDB Offline Sync Queues</h3>
-                   <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginTop: '1rem' }}>
-                       <div>
-                           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
-                               <span>Telemetry Updates Pending</span>
-                               <strong>{offlineCounts.telemetry} records</strong>
-                           </div>
-                           <div style={{ height: '8px', background: 'var(--bg)', borderRadius: '4px', overflow: 'hidden' }}>
-                               <div style={{ width: `${Math.min(offlineCounts.telemetry * 2, 100)}%`, height: '100%', background: '#FFC107', transition: 'width 0.5s' }}></div>
-                           </div>
-                       </div>
-                       <div>
-                           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
-                               <span>Personal Tags Sync Pending</span>
-                               <strong>{offlineCounts.tags} records</strong>
-                           </div>
-                           <div style={{ height: '8px', background: 'var(--bg)', borderRadius: '4px', overflow: 'hidden' }}>
-                               <div style={{ width: `${Math.min(offlineCounts.tags * 2, 100)}%`, height: '100%', background: '#2196F3', transition: 'width 0.5s' }}></div>
-                           </div>
-                       </div>
-                       <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem' }}>
-                           <button onClick={forceSync} style={{ flex: 1, padding: '0.75rem', background: 'transparent', border: '1px solid var(--border)', color: 'var(--text)', borderRadius: '8px', cursor: 'pointer' }}>
-                               Force Network Sync Emulation
-                           </button>
-                           <button onClick={async () => { await enqueueOfflineAction('telemetryQueue', { mock: 'sync_test' }); checkOfflineQueues(); }} style={{ padding: '0.75rem', background: '#34A853', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>
-                               +
-                           </button>
-                       </div>
-                   </div>
-                </div>
-            </div>
+             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                 <div style={{ background: 'var(--social-bg)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                    <h3 style={{ marginBottom: '1rem' }}>Search Cache Hit Rates</h3>
+                    <div style={{ width: '100%', height: 200 }}>
+                        <ResponsiveContainer>
+                            <BarChart data={cacheHitData} layout="vertical">
+                                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                                <XAxis type="number" stroke="var(--text-light)" />
+                                <YAxis dataKey="source" type="category" stroke="var(--text-light)" width={100} />
+                                <RechartsTooltip contentStyle={{ background: 'var(--bg)', border: '1px solid var(--border)' }} />
+                                <Legend />
+                                <Bar dataKey="hits" stackId="a" fill="#4CAF50" />
+                                <Bar dataKey="misses" stackId="a" fill="#F44336" />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                 </div>
 
-        </div>
+                 <div style={{ background: 'var(--social-bg)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                    <h3 style={{ marginBottom: '1rem' }}>IndexedDB Offline Sync Queues</h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginTop: '1rem' }}>
+                        <div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
+                                <span>Telemetry Updates Pending</span>
+                                <strong>{offlineCounts.telemetry} records</strong>
+                            </div>
+                            <div style={{ height: '8px', background: 'var(--bg)', borderRadius: '4px', overflow: 'hidden' }}>
+                                <div style={{ width: `${Math.min(offlineCounts.telemetry * 2, 100)}%`, height: '100%', background: '#FFC107', transition: 'width 0.5s' }}></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
+                                <span>Personal Tags Sync Pending</span>
+                                <strong>{offlineCounts.tags} records</strong>
+                            </div>
+                            <div style={{ height: '8px', background: 'var(--bg)', borderRadius: '4px', overflow: 'hidden' }}>
+                                <div style={{ width: `${Math.min(offlineCounts.tags * 2, 100)}%`, height: '100%', background: '#2196F3', transition: 'width 0.5s' }}></div>
+                            </div>
+                        </div>
+                        <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem' }}>
+                            <button onClick={forceSync} style={{ flex: 1, padding: '0.75rem', background: 'transparent', border: '1px solid var(--border)', color: 'var(--text)', borderRadius: '8px', cursor: 'pointer' }}>
+                                Force Network Sync Emulation
+                            </button>
+                            <button onClick={async () => { await enqueueOfflineAction('telemetryQueue', { mock: 'sync_test' }); checkOfflineQueues(); }} style={{ padding: '0.75rem', background: '#34A853', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>
+                                +
+                            </button>
+                        </div>
+                    </div>
+                 </div>
+             </div>
+
+         </div>
       )}
 
     </div>

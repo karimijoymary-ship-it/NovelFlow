@@ -929,6 +929,41 @@ public class BookController {
         return ResponseEntity.ok(review);
     }
 
+    @GetMapping("/all-reviews")
+    public ResponseEntity<List<BookReview>> getAllReviewsAdmin() {
+        List<BookReview> reviews = bookReviewRepository.findAll();
+        reviews.sort((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()));
+        return ResponseEntity.ok(reviews);
+    }
+
+    @DeleteMapping("/reviews/{reviewId}")
+    @Transactional
+    public ResponseEntity<?> deleteReviewAdmin(@PathVariable String reviewId) {
+        Optional<BookReview> reviewOpt = bookReviewRepository.findById(reviewId);
+        if (reviewOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        BookReview review = reviewOpt.get();
+        BookMaster book = review.getBookMaster();
+        String bookId = book != null ? book.getBookMasterId() : null;
+
+        bookReviewRepository.delete(review);
+
+        // Recalculate book average rating
+        if (bookId != null) {
+            List<BookReview> remainingReviews = bookReviewRepository.findByBookMasterBookMasterId(bookId);
+            if (!remainingReviews.isEmpty()) {
+                double avg = remainingReviews.stream().mapToDouble(BookReview::getRating).average().orElse(4.5);
+                book.setCalculatedAverageRating(Math.round(avg * 10.0) / 10.0);
+            } else {
+                book.setCalculatedAverageRating(4.5);
+            }
+            bookMasterRepository.save(book);
+        }
+
+        return ResponseEntity.ok(Map.of("message", "Review deleted successfully"));
+    }
+
     public static class ReviewRequest {
         private String reviewerName;
         private String reviewerStream;
