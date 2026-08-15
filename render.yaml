@@ -22,13 +22,12 @@ services:
     buildCommand: cd frontend && npm install && npm run build
     staticPublishPath: ./frontend/dist
     plan: free
-    region: oregon
     envVars:
       - key: VITE_API_BASE_URL
         fromService:
           type: web
           name: novelflow-backend
-          property: url
+          property: host
     routes:
       - type: rewrite
         source: /*
