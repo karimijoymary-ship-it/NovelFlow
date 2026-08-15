@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getApiUrl } from './apiConfig';
 
 const ManualBookForm = ({ onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
@@ -27,7 +28,7 @@ const ManualBookForm = ({ onClose, onSuccess }) => {
       releaseYear: formData.releaseYear ? parseInt(formData.releaseYear) : null
     };
 
-    fetch('/api/books/manual', {
+    fetch(getApiUrl('/api/books/manual'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)

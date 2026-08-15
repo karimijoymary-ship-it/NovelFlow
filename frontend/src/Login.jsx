@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getApiUrl } from './apiConfig';
 
 function Login({ onLoginSuccess }) {
   const [isRegister, setIsRegister] = useState(false);
@@ -16,7 +17,7 @@ function Login({ onLoginSuccess }) {
     setError(null);
     setSuccess(null);
 
-    const url = isRegister ? '/api/auth/register' : '/api/auth/login';
+    const url = getApiUrl(isRegister ? '/api/auth/register' : '/api/auth/login');
     const payload = isRegister
       ? { email, password, fullName, academicStream }
       : { email, password };
@@ -30,7 +31,7 @@ function Login({ onLoginSuccess }) {
     })
       .then((res) => {
         if (!res.ok) {
-          return res.json().then((data) => {
+          return res.json().catch(() => ({ message: `Server error (${res.status})` })).then((data) => {
             throw new Error(data.message || 'Authentication failed');
           });
         }
