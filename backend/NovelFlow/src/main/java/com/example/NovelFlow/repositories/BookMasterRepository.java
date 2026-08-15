@@ -11,6 +11,6 @@ import java.util.List;
 @Repository
 public interface BookMasterRepository extends JpaRepository<BookMaster, String> {
 
-    @Query("SELECT DISTINCT bm FROM BookMaster bm LEFT JOIN bm.editions e WHERE LOWER(bm.originalAuthor) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(e.title) LIKE LOWER(CONCAT('%', :query, '%'))")
+    @Query("SELECT DISTINCT bm FROM BookMaster bm LEFT JOIN bm.editions e WHERE LOWER(bm.originalAuthor) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(e.title) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(bm.synopsis) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(bm.customTags) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(bm.thematicElements) LIKE LOWER(CONCAT('%', :query, '%'))")
     List<BookMaster> searchLocal(@Param("query") String query);
 }

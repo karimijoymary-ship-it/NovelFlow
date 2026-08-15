@@ -81,118 +81,135 @@ public class DatabaseSeeder implements CommandLineRunner {
 
     private void seedBooksAndTelemetry(User admin) {
         // 1. Seed User
-        User user = new User();
-        user.setUserId("user_1");
-        user.setFullName("Alice Reader");
-        user.setEmail("alice@example.com");
-        user.setAcademicStream("Comparative Literature");
-        user.setPasswordHash(passwordEncoder.encode("password123"));
-        userRepository.save(user);
+        User user = userRepository.findById("user_1").orElseGet(() -> {
+            User u = new User();
+            u.setUserId("user_1");
+            u.setFullName("Alice Reader");
+            u.setEmail("alice@example.com");
+            u.setAcademicStream("Comparative Literature");
+            u.setPasswordHash(passwordEncoder.encode("password123"));
+            return userRepository.save(u);
+        });
 
         // 2. Seed Book 1: The Great Gatsby
-        BookMaster gatsby = new BookMaster();
-        gatsby.setBookMasterId("book_1");
-        gatsby.setOriginalAuthor("F. Scott Fitzgerald");
-        gatsby.setOriginalReleaseYear(1925);
-        gatsby.setCalculatedAverageRating(4.5);
-        gatsby.setSynopsis("A novel set in the Jazz Age that tells the story of Jay Gatsby's unrequited love for Daisy Buchanan.");
-        gatsby.setDnaComplexity(80);
-        gatsby.setDnaDarkness(75);
-        gatsby.setDnaPacing(60);
-        gatsby.setDnaRomance(85);
-        gatsby.setDnaWorldBuild(65);
-        gatsby.setCustomTags("#JazzAge, #AmericanDream, #ModernistLit");
-        gatsby.setThematicElements("Social Stratification, Illusion vs Reality, Nostalgia & Time");
-        bookMasterRepository.save(gatsby);
+        BookMaster gatsby;
+        if (!bookMasterRepository.existsById("book_1")) {
+            gatsby = new BookMaster();
+            gatsby.setBookMasterId("book_1");
+            gatsby.setOriginalAuthor("F. Scott Fitzgerald");
+            gatsby.setOriginalReleaseYear(1925);
+            gatsby.setCalculatedAverageRating(4.5);
+            gatsby.setSynopsis("A novel set in the Jazz Age that tells the story of Jay Gatsby's unrequited love for Daisy Buchanan.");
+            gatsby.setDnaComplexity(80);
+            gatsby.setDnaDarkness(75);
+            gatsby.setDnaPacing(60);
+            gatsby.setDnaRomance(85);
+            gatsby.setDnaWorldBuild(65);
+            gatsby.setCustomTags("#JazzAge, #AmericanDream, #ModernistLit");
+            gatsby.setThematicElements("Social Stratification, Illusion vs Reality, Nostalgia & Time");
+            gatsby = bookMasterRepository.save(gatsby);
 
-        BookEdition gatsbyEn = new BookEdition();
-        gatsbyEn.setEditionId("edition_1_en");
-        gatsbyEn.setBookMaster(gatsby);
-        gatsbyEn.setLanguageTag("en");
-        gatsbyEn.setTitle("The Great Gatsby");
-        gatsbyEn.setIsbnBarcode("9780743273565");
+            BookEdition gatsbyEn = new BookEdition();
+            gatsbyEn.setEditionId("edition_1_en");
+            gatsbyEn.setBookMaster(gatsby);
+            gatsbyEn.setLanguageTag("en");
+            gatsbyEn.setTitle("The Great Gatsby");
+            gatsbyEn.setIsbnBarcode("9780743273565");
 
-        BookEdition gatsbySw = new BookEdition();
-        gatsbySw.setEditionId("edition_1_sw");
-        gatsbySw.setBookMaster(gatsby);
-        gatsbySw.setLanguageTag("sw");
-        gatsbySw.setTitle("Gatsby Mkuu");
-        gatsbySw.setIsbnBarcode("9789966115201");
+            BookEdition gatsbySw = new BookEdition();
+            gatsbySw.setEditionId("edition_1_sw");
+            gatsbySw.setBookMaster(gatsby);
+            gatsbySw.setLanguageTag("sw");
+            gatsbySw.setTitle("Gatsby Mkuu");
+            gatsbySw.setIsbnBarcode("9789966115201");
 
-        bookEditionRepository.saveAll(Arrays.asList(gatsbyEn, gatsbySw));
+            bookEditionRepository.saveAll(Arrays.asList(gatsbyEn, gatsbySw));
 
-        CharacterNode gatsbyChar = createCharacter("char_1_1", gatsby, "Jay Gatsby", "Tragic Hero");
-        CharacterNode nickChar = createCharacter("char_1_2", gatsby, "Nick Carraway", "Narrator");
-        CharacterNode daisyChar = createCharacter("char_1_3", gatsby, "Daisy Buchanan", "Love Interest");
-        CharacterNode tomChar = createCharacter("char_1_4", gatsby, "Tom Buchanan", "Antagonist");
+            CharacterNode gatsbyChar = createCharacter("char_1_1", gatsby, "Jay Gatsby", "Tragic Hero");
+            CharacterNode nickChar = createCharacter("char_1_2", gatsby, "Nick Carraway", "Narrator");
+            CharacterNode daisyChar = createCharacter("char_1_3", gatsby, "Daisy Buchanan", "Love Interest");
+            CharacterNode tomChar = createCharacter("char_1_4", gatsby, "Tom Buchanan", "Antagonist");
 
-        createRelationship("rel_1_1", gatsbyChar, daisyChar, "Love Interest");
-        createRelationship("rel_1_2", nickChar, gatsbyChar, "Ally");
-        createRelationship("rel_1_3", tomChar, gatsbyChar, "Adversary");
-        createRelationship("rel_1_4", tomChar, daisyChar, "Spouse");
+            createRelationship("rel_1_1", gatsbyChar, daisyChar, "Love Interest");
+            createRelationship("rel_1_2", nickChar, gatsbyChar, "Ally");
+            createRelationship("rel_1_3", tomChar, gatsbyChar, "Adversary");
+            createRelationship("rel_1_4", tomChar, daisyChar, "Spouse");
+        } else {
+            gatsby = bookMasterRepository.findById("book_1").orElse(null);
+        }
 
         // 3. Seed Book 2: Dune
-        BookMaster dune = new BookMaster();
-        dune.setBookMasterId("book_2");
-        dune.setOriginalAuthor("Frank Herbert");
-        dune.setOriginalReleaseYear(1965);
-        dune.setCalculatedAverageRating(4.8);
-        dune.setSynopsis("Set on the desert planet Arrakis, Dune is the story of the boy Paul Atreides, heir to a noble family in a feudal intergalactic empire.");
-        dune.setDnaComplexity(95);
-        dune.setDnaDarkness(70);
-        dune.setDnaPacing(80);
-        dune.setDnaWorldBuild(98);
-        dune.setCustomTags("#SciFiMasterpiece, #WorldBuilding, #EcologicalFiction");
-        dune.setThematicElements("Ecological Crisis, Messianic Hero Traps, Power & Imperialism");
-        bookMasterRepository.save(dune);
+        BookMaster dune;
+        if (!bookMasterRepository.existsById("book_2")) {
+            dune = new BookMaster();
+            dune.setBookMasterId("book_2");
+            dune.setOriginalAuthor("Frank Herbert");
+            dune.setOriginalReleaseYear(1965);
+            dune.setCalculatedAverageRating(4.8);
+            dune.setSynopsis("Set on the desert planet Arrakis, Dune is the story of the boy Paul Atreides, heir to a noble family in a feudal intergalactic empire.");
+            dune.setDnaComplexity(95);
+            dune.setDnaDarkness(70);
+            dune.setDnaPacing(80);
+            dune.setDnaWorldBuild(98);
+            dune.setCustomTags("#SciFiMasterpiece, #WorldBuilding, #EcologicalFiction");
+            dune.setThematicElements("Ecological Crisis, Messianic Hero Traps, Power & Imperialism");
+            dune = bookMasterRepository.save(dune);
 
-        BookEdition duneEn = new BookEdition();
-        duneEn.setEditionId("edition_2_en");
-        duneEn.setBookMaster(dune);
-        duneEn.setLanguageTag("en");
-        duneEn.setTitle("Dune");
-        duneEn.setIsbnBarcode("9780441172719");
-        bookEditionRepository.save(duneEn);
+            BookEdition duneEn = new BookEdition();
+            duneEn.setEditionId("edition_2_en");
+            duneEn.setBookMaster(dune);
+            duneEn.setLanguageTag("en");
+            duneEn.setTitle("Dune");
+            duneEn.setIsbnBarcode("9780441172719");
+            bookEditionRepository.save(duneEn);
 
-        CharacterNode paulChar = createCharacter("char_2_1", dune, "Paul Atreides", "Messiah");
-        CharacterNode jessicaChar = createCharacter("char_2_2", dune, "Lady Jessica", "Mother / Mentor");
-        CharacterNode baronChar = createCharacter("char_2_3", dune, "Baron Harkonnen", "Antagonist");
-        CharacterNode chaniChar = createCharacter("char_2_4", dune, "Chani", "Love Interest / Ally");
+            CharacterNode paulChar = createCharacter("char_2_1", dune, "Paul Atreides", "Messiah");
+            CharacterNode jessicaChar = createCharacter("char_2_2", dune, "Lady Jessica", "Mother / Mentor");
+            CharacterNode baronChar = createCharacter("char_2_3", dune, "Baron Harkonnen", "Antagonist");
+            CharacterNode chaniChar = createCharacter("char_2_4", dune, "Chani", "Love Interest / Ally");
 
-        createRelationship("rel_2_1", paulChar, baronChar, "Adversary");
-        createRelationship("rel_2_2", jessicaChar, paulChar, "Family");
-        createRelationship("rel_2_3", chaniChar, paulChar, "Love Interest");
+            createRelationship("rel_2_1", paulChar, baronChar, "Adversary");
+            createRelationship("rel_2_2", jessicaChar, paulChar, "Family");
+            createRelationship("rel_2_3", chaniChar, paulChar, "Love Interest");
+        } else {
+            dune = bookMasterRepository.findById("book_2").orElse(null);
+        }
 
         // 4. Seed Book 3: 1984
-        BookMaster orwell1984 = new BookMaster();
-        orwell1984.setBookMasterId("book_3");
-        orwell1984.setOriginalAuthor("George Orwell");
-        orwell1984.setOriginalReleaseYear(1949);
-        orwell1984.setCalculatedAverageRating(4.2);
-        orwell1984.setSynopsis("A dystopian novel set in Airstrip One, a province of the superstate Oceania in a world of perpetual war, omnipresent government surveillance, and totalitarianism.");
-        orwell1984.setDnaComplexity(88);
-        orwell1984.setDnaDarkness(95);
-        orwell1984.setDnaPacing(70);
-        orwell1984.setDnaWorldBuild(90);
-        orwell1984.setCustomTags("#DystopianClassic, #PoliticalSatire, #Totalitarianism");
-        bookMasterRepository.save(orwell1984);
+        BookMaster orwell1984;
+        if (!bookMasterRepository.existsById("book_3")) {
+            orwell1984 = new BookMaster();
+            orwell1984.setBookMasterId("book_3");
+            orwell1984.setOriginalAuthor("George Orwell");
+            orwell1984.setOriginalReleaseYear(1949);
+            orwell1984.setCalculatedAverageRating(4.2);
+            orwell1984.setSynopsis("A dystopian novel set in Airstrip One, a province of the superstate Oceania in a world of perpetual war, omnipresent government surveillance, and totalitarianism.");
+            orwell1984.setDnaComplexity(88);
+            orwell1984.setDnaDarkness(95);
+            orwell1984.setDnaPacing(70);
+            orwell1984.setDnaWorldBuild(90);
+            orwell1984.setCustomTags("#DystopianClassic, #PoliticalSatire, #Totalitarianism");
+            orwell1984 = bookMasterRepository.save(orwell1984);
 
-        BookEdition orwell1984En = new BookEdition();
-        orwell1984En.setEditionId("edition_3_en");
-        orwell1984En.setBookMaster(orwell1984);
-        orwell1984En.setLanguageTag("en");
-        orwell1984En.setTitle("Nineteen Eighty-Four");
-        orwell1984En.setIsbnBarcode("9780451524935");
-        bookEditionRepository.save(orwell1984En);
+            BookEdition orwell1984En = new BookEdition();
+            orwell1984En.setEditionId("edition_3_en");
+            orwell1984En.setBookMaster(orwell1984);
+            orwell1984En.setLanguageTag("en");
+            orwell1984En.setTitle("Nineteen Eighty-Four");
+            orwell1984En.setIsbnBarcode("9780451524935");
+            bookEditionRepository.save(orwell1984En);
 
-        CharacterNode winstonChar = createCharacter("char_3_1", orwell1984, "Winston Smith", "Rebel");
-        CharacterNode juliaChar = createCharacter("char_3_2", orwell1984, "Julia", "Lover");
-        CharacterNode obrienChar = createCharacter("char_3_3", orwell1984, "O'Brien", "Inquisitor / Deceiver");
-        CharacterNode bbChar = createCharacter("char_3_4", orwell1984, "Big Brother", "Symbolic Tyrant");
+            CharacterNode winstonChar = createCharacter("char_3_1", orwell1984, "Winston Smith", "Rebel");
+            CharacterNode juliaChar = createCharacter("char_3_2", orwell1984, "Julia", "Lover");
+            CharacterNode obrienChar = createCharacter("char_3_3", orwell1984, "O'Brien", "Inquisitor / Deceiver");
+            CharacterNode bbChar = createCharacter("char_3_4", orwell1984, "Big Brother", "Symbolic Tyrant");
 
-        createRelationship("rel_3_1", winstonChar, juliaChar, "Love Interest");
-        createRelationship("rel_3_2", winstonChar, obrienChar, "Adversary");
-        createRelationship("rel_3_3", obrienChar, winstonChar, "Mentor");
+            createRelationship("rel_3_1", winstonChar, juliaChar, "Love Interest");
+            createRelationship("rel_3_2", winstonChar, obrienChar, "Adversary");
+            createRelationship("rel_3_3", obrienChar, winstonChar, "Mentor");
+        } else {
+            orwell1984 = bookMasterRepository.findById("book_3").orElse(null);
+        }
 
         // 5. Seed Book 11: Blossoms of the Savannah (Henry Ole Kulet)
         if (!bookMasterRepository.existsById("book_11")) {
