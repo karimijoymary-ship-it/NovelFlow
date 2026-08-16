@@ -92,7 +92,6 @@ public class DatabaseSeeder implements CommandLineRunner {
  .replaceAll("[\\uD83C-\\uDBFF][\\uDC00-\\uDFFF]", "")
  .replaceAll("[\\u2600-\\u27BF]", "")
  .replaceAll("[\\u2300-\\u25FF]", "")
- .replaceAll("[]", "")
  .trim();
  }
 

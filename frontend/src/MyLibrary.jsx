@@ -392,17 +392,6 @@ const MyLibrary = ({ user }) => {
  dnf.map(renderBookItem)
  )}
  </section>
- <p style={{ fontSize: '0.875rem', color: 'var(--text-light)', marginBottom: '1rem' }}>
- Dropped books alongside the recorded drop-state reason.
- </p>
- {dnf.length === 0 ? (
- <div className="empty-state-mini" style={{ padding: '2rem', background: 'var(--social-bg)', borderRadius: '12px', textAlign: 'center', border: '1px dashed var(--border)' }}>
- No dropped books. Great dedication!
- </div>
- ) : (
- dnf.map(renderBookItem)
- )}
- </section>
 
  </div>
  )}
