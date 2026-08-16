@@ -46,7 +46,7 @@ export default function CatalogView({ onSelectBook, onAddManual }) {
     <div className="main-content catalog-view animate-fade-in" style={{ padding: '2rem' }}>
       <header className="book-header" style={{ borderBottom: 'none', paddingBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h1 style={{ margin: 0 }}>Literary Catalog Discovery</h1>
+          <h1 style={{ margin: 0, lineHeight: 1.25, fontSize: '1.85rem', fontWeight: 700 }}>Literary Catalog Discovery</h1>
           <p style={{ color: 'var(--text-light)', marginTop: '0.4rem', fontSize: '0.9rem' }}>
             Explore the complete curated master library, academic texts, and community set books.
           </p>
