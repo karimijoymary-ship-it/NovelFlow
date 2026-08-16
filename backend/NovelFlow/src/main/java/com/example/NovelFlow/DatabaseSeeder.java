@@ -519,7 +519,7 @@ public class DatabaseSeeder implements CommandLineRunner {
  BookSet tagSet = new BookSet();
  tagSet.setName("#DystopianClassic Literature Cluster");
  tagSet.setDescription("Student multi-label taxonomy aggregating dystopian socio-political fiction.");
- tagSet.setIcon("️");
+ tagSet.setIcon("");
  tagSet.setSetType("CUSTOM_TAG");
  tagSet.setTargetTag("#DystopianClassic");
  tagSet.setOwnerUserId("user_1");

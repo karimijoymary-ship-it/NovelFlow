@@ -364,7 +364,7 @@ function App() {
  )}
  {selectedBook.customTags && (
  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
- <span style={{ fontSize: '0.78rem', color: 'var(--accent)', fontWeight: 600, textTransform: 'uppercase' }}>️ Micro Tags:</span>
+ <span style={{ fontSize: '0.78rem', color: 'var(--accent)', fontWeight: 600, textTransform: 'uppercase' }}> Micro Tags:</span>
  {selectedBook.customTags.split(',').map((t, idx) => (
  <span key={idx} style={{ background: 'var(--accent-bg)', border: '1px solid var(--accent-border)', color: 'var(--accent)', padding: '3px 10px', borderRadius: '12px', fontSize: '0.82rem', fontWeight: 600 }}>
  {t.trim().startsWith('#') ? t.trim() : `#${t.trim()}`}
@@ -534,7 +534,7 @@ function App() {
  className={`theme-toggle-btn ${theme === t ? 'active' : ''}`}
  onClick={() => setTheme(t)}
  >
- {t === 'light' ? '️ Light' : t === 'dark' ? ' Dark' : ' System'}
+ {t === 'light' ? ' Light' : t === 'dark' ? ' Dark' : ' System'}
  </button>
  ))}
  </div>

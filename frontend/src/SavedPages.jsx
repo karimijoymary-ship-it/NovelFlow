@@ -135,9 +135,9 @@ const SavedPages = () => {
  case 'PASSAGE':
  return { label: ' Bookmarked Passage', color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.15)' };
  case 'SNAPSHOT':
- return { label: '️ Character Web Snapshot', color: '#a855f7', bg: 'rgba(168, 85, 247, 0.15)' };
+ return { label: ' Character Web Snapshot', color: '#a855f7', bg: 'rgba(168, 85, 247, 0.15)' };
  case 'ANNOTATION':
- return { label: '️ Personal Study Annotation', color: '#10b981', bg: 'rgba(16, 185, 129, 0.15)' };
+ return { label: ' Personal Study Annotation', color: '#10b981', bg: 'rgba(16, 185, 129, 0.15)' };
  default:
  return { label: ' Saved Item', color: 'var(--text-h)', bg: 'var(--code-bg)' };
  }
@@ -203,7 +203,7 @@ const SavedPages = () => {
  }}
  >
  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
- <span style={{ fontSize: '1.6rem' }}>️</span>
+ <span style={{ fontSize: '1.6rem' }}></span>
  <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--text-h)' }}>Character Web Snapshots</h3>
  </div>
  <p style={{ fontSize: '0.85rem', color: 'var(--text-light)', margin: '0 0 8px 0' }}>
@@ -227,7 +227,7 @@ const SavedPages = () => {
  }}
  >
  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
- <span style={{ fontSize: '1.6rem' }}>️</span>
+ <span style={{ fontSize: '1.6rem' }}></span>
  <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--text-h)' }}>Personal Study Annotations</h3>
  </div>
  <p style={{ fontSize: '0.85rem', color: 'var(--text-light)', margin: '0 0 8px 0' }}>
@@ -245,8 +245,8 @@ const SavedPages = () => {
  {[
  { id: 'ALL', label: 'All Items' },
  { id: 'PASSAGE', label: ' Bookmarked Passages' },
- { id: 'SNAPSHOT', label: '️ Character Snapshots' },
- { id: 'ANNOTATION', label: '️ Study Annotations' }
+ { id: 'SNAPSHOT', label: ' Character Snapshots' },
+ { id: 'ANNOTATION', label: ' Study Annotations' }
  ].map(cat => (
  <button
  key={cat.id}
@@ -311,7 +311,7 @@ const SavedPages = () => {
  style={{ background: 'transparent', border: 'none', color: '#ef4444', fontSize: '0.85rem', cursor: 'pointer' }}
  title="Delete Entry"
  >
- ️ Delete
+  Delete
  </button>
  </div>
 
@@ -344,7 +344,7 @@ const SavedPages = () => {
  {item.screenshotUrl && (
  <div style={{ marginTop: '8px' }}>
  <div style={{ fontSize: '0.8rem', color: 'var(--text-light)', marginBottom: '6px', fontWeight: 600 }}>
- ️ Attached Screenshot:
+  Attached Screenshot:
  </div>
  <img 
  src={item.screenshotUrl} 
@@ -390,8 +390,8 @@ const SavedPages = () => {
  style={{ width: '100%', padding: '8px 10px', border: '1px solid var(--border)', borderRadius: '6px', background: 'var(--bg)', color: 'var(--text-h)', fontSize: '0.85rem' }}
  >
  <option value="PASSAGE"> Bookmarked Passage</option>
- <option value="SNAPSHOT">️ Character Web Snapshot</option>
- <option value="ANNOTATION">️ Personal Study Annotation</option>
+ <option value="SNAPSHOT"> Character Web Snapshot</option>
+ <option value="ANNOTATION"> Personal Study Annotation</option>
  </select>
  </div>
 

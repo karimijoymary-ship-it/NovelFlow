@@ -418,7 +418,7 @@ const Collections = () => {
  { id: 'ALL', label: ' All Collections', count: sets.length },
  { id: 'COURSE', label: ' Course Syllabi', count: sets.filter(s => s.setType === 'COURSE').length },
  { id: 'PSYCHOGRAPHIC_PRESET', label: ' Psychographic DNA', count: sets.filter(s => s.setType === 'PSYCHOGRAPHIC_PRESET').length },
- { id: 'CUSTOM_TAG', label: '️ Custom Tags', count: getAllTags().length },
+ { id: 'CUSTOM_TAG', label: ' Custom Tags', count: getAllTags().length },
  { id: 'SHARED_LIST', label: ' Collaborative Lists', count: sets.filter(s => s.setType === 'SHARED_LIST').length }
  ].map(tab => (
  <button
@@ -450,7 +450,7 @@ const Collections = () => {
  {activeTab === 'CUSTOM_TAG' && (
  <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
  <div style={{ background: 'var(--social-bg)', padding: '20px', borderRadius: '12px', border: '1px solid var(--border)' }}>
- <h3 style={{ margin: '0 0 8px 0', color: 'var(--text-h)' }}>️ Multi-Label Tag Taxonomy</h3>
+ <h3 style={{ margin: '0 0 8px 0', color: 'var(--text-h)' }}> Multi-Label Tag Taxonomy</h3>
  <p style={{ color: 'var(--text-light)', fontSize: '0.9rem', margin: '0 0 16px 0' }}>
  Click any taxonomic tag to aggregate books across micro-themes, historical periods, or author studies.
  </p>
@@ -611,7 +611,7 @@ const Collections = () => {
  onClick={() => setEditingDnaBook(isEditingThis ? null : { ...b })}
  style={{ padding: '4px 10px', background: 'var(--accent-bg)', color: 'var(--accent)', border: '1px solid var(--accent-border)', borderRadius: '6px', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 600 }}
  >
- {isEditingThis ? 'X Close' : '️ Tune Analytics DNA'}
+ {isEditingThis ? 'X Close' : ' Tune Analytics DNA'}
  </button>
  </div>
 
@@ -721,7 +721,7 @@ const Collections = () => {
  style={{ padding: '6px 12px', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.4)', color: '#f87171', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}
  title="Delete Collection"
  >
- ️ Delete
+  Delete
  </button>
  <button
  type="button"
@@ -938,7 +938,7 @@ const Collections = () => {
  style={{ padding: '0.55rem 0.75rem', borderRadius: '6px', border: '1px solid rgba(239, 68, 68, 0.3)', background: 'rgba(239, 68, 68, 0.1)', color: '#f87171', cursor: 'pointer', fontSize: '0.85rem' }}
  title="Delete Collection"
  >
- ️
+ 
  </button>
  </div>
  </div>
@@ -968,7 +968,7 @@ const Collections = () => {
  >
  <option value="COURSE"> Course & Curriculum Syllabus</option>
  <option value="PSYCHOGRAPHIC_PRESET"> Psychographic DNA Preset</option>
- <option value="CUSTOM_TAG">️ Custom Tags Taxonomy Cluster</option>
+ <option value="CUSTOM_TAG"> Custom Tags Taxonomy Cluster</option>
  <option value="SHARED_LIST"> Collaborative / Shared Reading List</option>
  </select>
  </div>

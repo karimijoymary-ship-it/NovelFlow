@@ -268,7 +268,7 @@ export default function BookAnalyticsView({ book, onBookUpdated }) {
  {/* DNA CUSTOM TAGS METRICS DISPLAY */}
  <div style={{ width: '100%', marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px dashed var(--border)' }}>
  <div style={{ fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-light)', fontWeight: 600, marginBottom: '8px' }}>
- ️ DNA Custom Tags Vector
+  DNA Custom Tags Vector
  </div>
  {currentTagList.length === 0 ? (
  <div style={{ fontSize: '0.82rem', color: 'var(--text-light)', fontStyle: 'italic', background: 'var(--bg)', padding: '8px 12px', borderRadius: '6px' }}>
@@ -359,7 +359,7 @@ export default function BookAnalyticsView({ book, onBookUpdated }) {
  style={{ background: 'transparent', border: 'none', color: '#ef4444', fontSize: '0.9rem', cursor: 'pointer', padding: 0 }}
  title="Delete Theme Slider"
  >
- ️
+ 
  </button>
  </div>
  ))}

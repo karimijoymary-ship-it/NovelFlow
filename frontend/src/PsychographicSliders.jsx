@@ -154,7 +154,7 @@ export default function PsychographicSliders({ book, bookId, userId, onTelemetry
  >
  {status === 'Reading' && ' '}
  {status === 'Completed' && ' '}
- {status === 'Queue' && '⏳ '}
+ {status === 'Queue' && ' '}
  {status === 'DNF' && ' '}
  {status}
  </button>

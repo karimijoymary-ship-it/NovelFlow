@@ -145,7 +145,7 @@ const MyLibrary = ({ user }) => {
         </div>
         <div style={{ fontSize: '0.85rem', color: 'var(--accent)', marginTop: '0.25rem', fontWeight: 600 }}>
           {t.pagesCompleted} pages read
-          {t.fractionalRating > 0 && ` • ⭐ ${t.fractionalRating}`}
+          {t.fractionalRating > 0 && ` •  ${t.fractionalRating}`}
         </div>
       </div>
     );
