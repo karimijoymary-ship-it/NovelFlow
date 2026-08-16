@@ -180,7 +180,7 @@ const MyLibrary = ({ user }) => {
             boxShadow: '0 4px 12px rgba(168, 85, 247, 0.3)'
           }}
         >
-          <span>{showLogModal ? '✕ Close Form' : '➕ Log Completed Book'}</span>
+          <span>{showLogModal ? 'Close Form' : '+ Log Completed Book'}</span>
         </button>
       </header>
 
@@ -190,7 +190,7 @@ const MyLibrary = ({ user }) => {
         </div>
       )}
 
-      {/* ➕ LOG COMPLETED BOOK MODAL / FORM PANEL */}
+      {/* LOG COMPLETED BOOK MODAL / FORM PANEL */}
       {showLogModal && (
         <div style={{ background: 'var(--social-bg)', borderRadius: '12px', border: '1px solid var(--accent)', padding: '1.5rem', marginBottom: '2rem' }} className="animate-slide-down">
           <h3 style={{ margin: '0 0 10px 0', color: 'var(--accent)', textTransform: 'uppercase', fontSize: '0.9rem', letterSpacing: '0.5px' }}>
@@ -273,20 +273,20 @@ const MyLibrary = ({ user }) => {
 
               <div>
                 <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-h)', textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px' }}>
-                  Completion Rating (1 to 5 Stars)
+                  Completion Rating (1 to 5)
                 </label>
                 <select
                   value={rating}
                   onChange={e => setRating(e.target.value)}
                   style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-h)', outline: 'none' }}
                 >
-                  <option value="5.0">⭐⭐⭐⭐⭐ (5.0 - Exceptional)</option>
-                  <option value="4.5">⭐⭐⭐⭐½ (4.5 - Excellent)</option>
-                  <option value="4.0">⭐⭐⭐⭐ (4.0 - Very Good)</option>
-                  <option value="3.5">⭐⭐⭐½ (3.5 - Good)</option>
-                  <option value="3.0">⭐⭐⭐ (3.0 - Average)</option>
-                  <option value="2.0">⭐⭐ (2.0 - Below Average)</option>
-                  <option value="1.0">⭐ (1.0 - Poor)</option>
+                  <option value="5.0">5.0 - Exceptional</option>
+                  <option value="4.5">4.5 - Excellent</option>
+                  <option value="4.0">4.0 - Very Good</option>
+                  <option value="3.5">3.5 - Good</option>
+                  <option value="3.0">3.0 - Average</option>
+                  <option value="2.0">2.0 - Below Average</option>
+                  <option value="1.0">1.0 - Poor</option>
                 </select>
               </div>
             </div>
@@ -318,18 +318,18 @@ const MyLibrary = ({ user }) => {
       ) : (
         <div className="library-sections-grid" style={{ display: 'grid', gap: '2rem', marginTop: '1rem' }}>
 
-          {/* 1. ✅ COMPLETED / READ SECTION (PLACED FIRST AS REQUESTED) */}
+          {/* 1. COMPLETED / READ SECTION */}
           <section className="library-section">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem', marginBottom: '1rem' }}>
               <h3 style={{ margin: 0 }}>
-                ✅ Completed / Read ({completed.length})
+                Completed / Read ({completed.length})
               </h3>
               <button
                 type="button"
                 onClick={() => setShowLogModal(!showLogModal)}
                 style={{ padding: '4px 10px', background: 'var(--accent-bg)', color: 'var(--accent)', border: '1px solid var(--accent-border)', borderRadius: '6px', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 600 }}
               >
-                ➕ Quick Log
+                + Quick Log
               </button>
             </div>
             <p style={{ fontSize: '0.875rem', color: 'var(--text-light)', marginBottom: '1rem' }}>
@@ -337,17 +337,17 @@ const MyLibrary = ({ user }) => {
             </p>
             {completed.length === 0 ? (
               <div className="empty-state-mini" style={{ padding: '2rem', background: 'var(--social-bg)', borderRadius: '12px', textAlign: 'center', border: '1px dashed var(--border)' }}>
-                No completed books yet. Click "➕ Log Completed Book" above to quickly add one!
+                No completed books yet. Click "+ Log Completed Book" above to quickly add one!
               </div>
             ) : (
               completed.map(renderBookItem)
             )}
           </section>
 
-          {/* 2. 📚 CURRENTLY READING */}
+          {/* 2. CURRENTLY READING */}
           <section className="library-section">
             <h3 style={{ borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem', marginBottom: '1rem' }}>
-              📚 Currently Reading ({reading.length})
+              Currently Reading ({reading.length})
             </h3>
             <p style={{ fontSize: '0.875rem', color: 'var(--text-light)', marginBottom: '1rem' }}>
               Books with active reading progress.
@@ -361,10 +361,10 @@ const MyLibrary = ({ user }) => {
             )}
           </section>
 
-          {/* 3. ⏳ WANT TO READ / QUEUE */}
+          {/* 3. WANT TO READ / QUEUE */}
           <section className="library-section">
             <h3 style={{ borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem', marginBottom: '1rem' }}>
-              ⏳ Want to Read / Queue ({queue.length})
+              Want to Read / Queue ({queue.length})
             </h3>
             <p style={{ fontSize: '0.875rem', color: 'var(--text-light)', marginBottom: '1rem' }}>
               Books saved for upcoming coursework or semester reading lists.
@@ -378,11 +378,22 @@ const MyLibrary = ({ user }) => {
             )}
           </section>
 
-          {/* 4. 🛑 DID NOT FINISH (DNF) */}
+          {/* 4. DID NOT FINISH (DNF) */}
           <section className="library-section">
             <h3 style={{ borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem', marginBottom: '1rem' }}>
-              🛑 Did Not Finish (DNF) ({dnf.length})
+              Did Not Finish (DNF) ({dnf.length})
             </h3>
+            <p style={{ fontSize: '0.875rem', color: 'var(--text-light)', marginBottom: '1rem' }}>
+              Dropped books alongside the recorded drop-state reason.
+            </p>
+            {dnf.length === 0 ? (
+              <div className="empty-state-mini" style={{ padding: '2rem', background: 'var(--social-bg)', borderRadius: '12px', textAlign: 'center', border: '1px dashed var(--border)' }}>
+                No dropped books. Great dedication!
+              </div>
+            ) : (
+              dnf.map(renderBookItem)
+            )}
+          </section>
             <p style={{ fontSize: '0.875rem', color: 'var(--text-light)', marginBottom: '1rem' }}>
               Dropped books alongside the recorded drop-state reason.
             </p>
