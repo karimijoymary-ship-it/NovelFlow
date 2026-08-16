@@ -98,6 +98,46 @@ export default function CommunityReviewsView({ book, currentUser }) {
       .catch(console.error);
   };
 
+  const handleFlag = (reviewId) => {
+    fetch(getApiUrl(`/api/books/reviews/${reviewId}/flag`), {
+      method: 'PUT'
+    })
+      .then(res => res.json())
+      .then(updatedReview => {
+        setMessage("Review has been flagged for administrator review.");
+        setReviews(prev => prev.map(r => r.reviewId === reviewId ? updatedReview : r));
+        setTimeout(() => setMessage(null), 3000);
+      })
+      .catch(console.error);
+  };
+
+  const handleUnflag = (reviewId) => {
+    fetch(getApiUrl(`/api/books/reviews/${reviewId}/unflag`), {
+      method: 'PUT'
+    })
+      .then(res => res.json())
+      .then(updatedReview => {
+        setMessage("Review flag has been dismissed by admin.");
+        setReviews(prev => prev.map(r => r.reviewId === reviewId ? updatedReview : r));
+        setTimeout(() => setMessage(null), 3000);
+      })
+      .catch(console.error);
+  };
+
+  const handleAdminDelete = (reviewId) => {
+    if (!window.confirm("As Administrator, are you sure you want to delete this community review?")) return;
+    fetch(getApiUrl(`/api/books/reviews/${reviewId}`), {
+      method: 'DELETE'
+    })
+      .then(res => {
+        if (!res.ok) throw new Error("Failed to delete review.");
+        setMessage("Review deleted by administrator.");
+        setReviews(prev => prev.filter(r => r.reviewId !== reviewId));
+        setTimeout(() => setMessage(null), 3000);
+      })
+      .catch(console.error);
+  };
+
   if (!book) return null;
 
   // Rating Distribution Calculation
@@ -439,30 +479,85 @@ export default function CommunityReviewsView({ book, currentUser }) {
                   {rev.reviewText}
                 </p>
 
-                {/* HELPFUL UPVOTE FOOTER */}
-                <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', paddingTop: '6px', borderTop: '1px dashed var(--border)' }}>
-                  <button
-                    type="button"
-                    onClick={() => handleHelpful(rev.reviewId)}
-                    style={{
-                      background: 'var(--bg)',
-                      border: '1px solid var(--border)',
-                      borderRadius: '16px',
-                      padding: '4px 12px',
-                      fontSize: '0.78rem',
-                      color: 'var(--text)',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      fontWeight: 600
-                    }}
-                  >
-                    <span>👍 Helpful</span>
-                    <span style={{ color: 'var(--accent)', fontFamily: 'var(--mono)', fontWeight: 700 }}>
-                      {rev.helpfulCount || 0}
-                    </span>
-                  </button>
+                {/* HELPFUL & FLAGGING FOOTER */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '8px', borderTop: '1px dashed var(--border)' }}>
+                  <div>
+                    {rev.isFlagged ? (
+                      <span style={{ fontSize: '0.75rem', color: '#ef4444', background: 'rgba(239, 68, 68, 0.15)', padding: '2px 8px', borderRadius: '10px', fontWeight: 600 }}>
+                        🚩 Flagged for Admin Review
+                      </span>
+                    ) : (
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-light)' }}>
+                        Verified Community Member
+                      </span>
+                    )}
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <button
+                      type="button"
+                      onClick={() => handleHelpful(rev.reviewId)}
+                      style={{
+                        background: 'var(--bg)',
+                        border: '1px solid var(--border)',
+                        borderRadius: '16px',
+                        padding: '4px 12px',
+                        fontSize: '0.78rem',
+                        color: 'var(--text)',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        fontWeight: 600
+                      }}
+                    >
+                      <span>👍 Helpful</span>
+                      <span style={{ color: 'var(--accent)', fontFamily: 'var(--mono)', fontWeight: 700 }}>
+                        {rev.helpfulCount || 0}
+                      </span>
+                    </button>
+
+                    {!rev.isFlagged && (
+                      <button
+                        type="button"
+                        onClick={() => handleFlag(rev.reviewId)}
+                        style={{
+                          background: 'transparent',
+                          border: '1px solid var(--border)',
+                          borderRadius: '16px',
+                          padding: '4px 10px',
+                          fontSize: '0.78rem',
+                          color: 'var(--text-light)',
+                          cursor: 'pointer'
+                        }}
+                        title="Flag inappropriate review for administrator"
+                      >
+                        🚩 Flag
+                      </button>
+                    )}
+
+                    {/* SPECIAL SYSTEM ADMINISTRATOR CONTROLS */}
+                    {currentUser?.role === 'admin' && (
+                      <div style={{ display: 'flex', gap: '6px', marginLeft: '6px', paddingLeft: '6px', borderLeft: '1px solid var(--border)' }}>
+                        {rev.isFlagged && (
+                          <button
+                            type="button"
+                            onClick={() => handleUnflag(rev.reviewId)}
+                            style={{ padding: '4px 8px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}
+                          >
+                            ✅ Dismiss Flag
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => handleAdminDelete(rev.reviewId)}
+                          style={{ padding: '4px 8px', background: '#ef4444', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}
+                        >
+                          🗑️ Delete
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
               </div>

@@ -961,6 +961,30 @@ public class BookController {
         return ResponseEntity.ok(review);
     }
 
+    @PutMapping("/reviews/{reviewId}/flag")
+    public ResponseEntity<?> flagReview(@PathVariable String reviewId) {
+        Optional<BookReview> reviewOpt = bookReviewRepository.findById(reviewId);
+        if (reviewOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        BookReview review = reviewOpt.get();
+        review.setIsFlagged(true);
+        bookReviewRepository.save(review);
+        return ResponseEntity.ok(review);
+    }
+
+    @PutMapping("/reviews/{reviewId}/unflag")
+    public ResponseEntity<?> unflagReview(@PathVariable String reviewId) {
+        Optional<BookReview> reviewOpt = bookReviewRepository.findById(reviewId);
+        if (reviewOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        BookReview review = reviewOpt.get();
+        review.setIsFlagged(false);
+        bookReviewRepository.save(review);
+        return ResponseEntity.ok(review);
+    }
+
     @GetMapping("/all-reviews")
     public ResponseEntity<List<BookReview>> getAllReviewsAdmin() {
         List<BookReview> reviews = bookReviewRepository.findAll();

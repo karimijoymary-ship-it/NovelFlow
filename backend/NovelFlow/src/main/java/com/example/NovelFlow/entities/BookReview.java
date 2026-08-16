@@ -37,7 +37,18 @@ public class BookReview {
     @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    @Column(name = "is_flagged")
+    private Boolean isFlagged = false;
+
     public BookReview() {}
+
+    public Boolean getIsFlagged() {
+        return isFlagged;
+    }
+
+    public void setIsFlagged(Boolean isFlagged) {
+        this.isFlagged = isFlagged;
+    }
 
     public String getReviewId() {
         return reviewId;

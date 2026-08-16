@@ -114,6 +114,19 @@ export default function AdminDashboardView() {
       });
   };
 
+  const [reviewFilter, setReviewFilter] = useState('ALL'); // ALL, FLAGGED
+
+  const unflagAdminReview = (reviewId) => {
+    fetch(getApiUrl(`/api/books/reviews/${reviewId}/unflag`), {
+      method: 'PUT'
+    })
+      .then(res => res.json())
+      .then(updatedReview => {
+        setAllReviews(allReviews.map(r => r.reviewId === reviewId ? updatedReview : r));
+      })
+      .catch(console.error);
+  };
+
   const deleteAdminReview = (reviewId, reviewerName) => {
     if (!window.confirm(`Are you sure you want to delete review by "${reviewerName}"? This action cannot be undone.`)) {
       return;
@@ -124,7 +137,7 @@ export default function AdminDashboardView() {
     })
       .then(res => {
         if (res.ok) {
-          setAllReviews(prev => prev.filter(r => r.reviewId !== reviewId));
+          setAllReviews(allReviews.filter(r => r.reviewId !== reviewId));
         }
       })
       .catch(console.error);
@@ -280,9 +293,40 @@ export default function AdminDashboardView() {
                   Inspect, manage, and moderate all user-submitted reviews across books.
                 </p>
               </div>
-              <span style={{ padding: '4px 12px', background: 'var(--accent-bg)', color: 'var(--accent)', borderRadius: '16px', fontWeight: 600, fontSize: '0.85rem' }}>
-                {allReviews.length} Total Reviews
-              </span>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <button
+                  type="button"
+                  onClick={() => setReviewFilter('ALL')}
+                  style={{
+                    padding: '4px 12px',
+                    borderRadius: '16px',
+                    fontSize: '0.8rem',
+                    fontWeight: 600,
+                    border: reviewFilter === 'ALL' ? '1px solid var(--accent)' : '1px solid var(--border)',
+                    background: reviewFilter === 'ALL' ? 'var(--accent-bg)' : 'transparent',
+                    color: reviewFilter === 'ALL' ? 'var(--accent)' : 'var(--text)',
+                    cursor: 'pointer'
+                  }}
+                >
+                  All ({allReviews.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setReviewFilter('FLAGGED')}
+                  style={{
+                    padding: '4px 12px',
+                    borderRadius: '16px',
+                    fontSize: '0.8rem',
+                    fontWeight: 600,
+                    border: reviewFilter === 'FLAGGED' ? '1px solid #ef4444' : '1px solid var(--border)',
+                    background: reviewFilter === 'FLAGGED' ? 'rgba(239, 68, 68, 0.15)' : 'transparent',
+                    color: reviewFilter === 'FLAGGED' ? '#ef4444' : 'var(--text)',
+                    cursor: 'pointer'
+                  }}
+                >
+                  🚩 Flagged Only ({allReviews.filter(r => r.isFlagged).length})
+                </button>
+              </div>
             </div>
 
             {loadingReviews ? (
@@ -291,13 +335,15 @@ export default function AdminDashboardView() {
               <p style={{ color: 'var(--text-light)' }}>No community reviews found.</p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                {allReviews.map(rev => (
+                {allReviews
+                  .filter(r => reviewFilter === 'ALL' || r.isFlagged)
+                  .map(rev => (
                   <div
                     key={rev.reviewId}
                     style={{
                       background: 'var(--bg)',
                       borderRadius: '8px',
-                      border: '1px solid var(--border)',
+                      border: rev.isFlagged ? '2px solid #ef4444' : '1px solid var(--border)',
                       padding: '1rem',
                       display: 'flex',
                       flexDirection: 'column',
@@ -312,18 +358,34 @@ export default function AdminDashboardView() {
                         <span style={{ fontSize: '0.78rem', color: 'var(--accent)', background: 'var(--accent-bg)', padding: '2px 8px', borderRadius: '10px' }}>
                           🎓 {rev.reviewerStream || 'General Reader'}
                         </span>
+                        {rev.isFlagged && (
+                          <span style={{ fontSize: '0.78rem', color: '#ef4444', background: 'rgba(239, 68, 68, 0.15)', padding: '2px 8px', borderRadius: '10px', fontWeight: 700 }}>
+                            🚩 FLAGGED FOR REVIEW
+                          </span>
+                        )}
                         <span style={{ fontSize: '0.78rem', color: 'var(--text-light)' }}>
                           Book: <strong>{rev.bookMaster?.editions?.[0]?.title || rev.bookMaster?.bookMasterId || 'Book'}</strong>
                         </span>
                       </div>
 
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <span style={{ color: '#f59e0b', fontWeight: 700, fontSize: '0.9rem' }}>
                           ★ {rev.rating ? rev.rating.toFixed(1) : '5.0'}
                         </span>
                         <span style={{ fontSize: '0.78rem', color: 'var(--text-light)' }}>
                           👍 {rev.helpfulCount || 0} Helpful
                         </span>
+
+                        {rev.isFlagged && (
+                          <button
+                            type="button"
+                            onClick={() => unflagAdminReview(rev.reviewId)}
+                            style={{ padding: '4px 10px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '0.78rem' }}
+                          >
+                            ✅ Dismiss Flag
+                          </button>
+                        )}
+
                         <button
                           type="button"
                           onClick={() => deleteAdminReview(rev.reviewId, rev.reviewerName)}
