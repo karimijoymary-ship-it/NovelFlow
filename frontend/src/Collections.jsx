@@ -415,11 +415,11 @@ const Collections = () => {
  {/* Category Navigation Tabs */}
  <div className="tabs-nav" style={{ marginBottom: '24px', borderBottom: '1px solid var(--border)', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
  {[
- { id: 'ALL', label: ' All Collections', count: sets.length },
- { id: 'COURSE', label: ' Course Syllabi', count: sets.filter(s => s.setType === 'COURSE').length },
- { id: 'PSYCHOGRAPHIC_PRESET', label: ' Psychographic DNA', count: sets.filter(s => s.setType === 'PSYCHOGRAPHIC_PRESET').length },
- { id: 'CUSTOM_TAG', label: ' Custom Tags', count: getAllTags().length },
- { id: 'SHARED_LIST', label: ' Collaborative Lists', count: sets.filter(s => s.setType === 'SHARED_LIST').length }
+ { id: 'ALL', label: 'All Collections', count: sets.length },
+ { id: 'COURSE', label: 'Course Syllabi', count: sets.filter(s => s.setType === 'COURSE').length },
+ { id: 'PSYCHOGRAPHIC_PRESET', label: 'Psychographic DNA', count: sets.filter(s => s.setType === 'PSYCHOGRAPHIC_PRESET').length },
+ { id: 'CUSTOM_TAG', label: 'Custom Tags', count: getAllTags().length },
+ { id: 'SHARED_LIST', label: 'Collaborative Lists', count: sets.filter(s => s.setType === 'SHARED_LIST').length }
  ].map(tab => (
  <button
  key={tab.id}

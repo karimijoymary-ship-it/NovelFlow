@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getApiUrl } from './apiConfig';
+import { stripEmoji } from './sanitize';
 
 const MyLibrary = ({ user }) => {
   const [telemetries, setTelemetries] = useState([]);
@@ -98,33 +99,30 @@ const MyLibrary = ({ user }) => {
           readingStatus: 'Completed',
           pagesCompleted: parseInt(pagesRead, 10) || 0,
           fractionalRating: parseFloat(rating) || 5.0,
-          dnfReason: null
         })
       });
 
-      if (!telRes.ok) throw new Error('Failed to save completed telemetry.');
+      if (!telRes.ok) throw new Error('Failed to update telemetry.');
 
-      setSubmitting(false);
+      setSuccessMsg('Successfully logged book to your Completed library!');
       setShowLogModal(false);
       setSelectedBookId('');
       setManualTitle('');
       setManualAuthor('');
-      setSuccessMsg('Successfully added book to your Completed Library!');
       fetchLibrary();
-      fetchCatalog();
-
-      setTimeout(() => setSuccessMsg(null), 3500);
-
+      setTimeout(() => setSuccessMsg(null), 3000);
     } catch (err) {
-      setSubmitting(false);
       setError(err.message);
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  const reading = telemetries.filter(t => t.readingStatus === 'Reading');
-  const queue = telemetries.filter(t => t.readingStatus === 'Queue');
-  const completed = telemetries.filter(t => t.readingStatus === 'Completed');
-  const dnf = telemetries.filter(t => t.readingStatus === 'DNF');
+  const cleanStatus = (s) => stripEmoji(s || '').trim();
+  const reading = telemetries.filter(t => cleanStatus(t.readingStatus).includes('Reading'));
+  const queue = telemetries.filter(t => cleanStatus(t.readingStatus).includes('Queue'));
+  const completed = telemetries.filter(t => cleanStatus(t.readingStatus).includes('Completed'));
+  const dnf = telemetries.filter(t => cleanStatus(t.readingStatus).includes('DNF'));
 
   const getTitle = (bookMaster) => {
     if (!bookMaster) return 'Unknown Title';

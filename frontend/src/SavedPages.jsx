@@ -133,13 +133,13 @@ const SavedPages = () => {
  const getCategoryBadge = (cat) => {
  switch (cat) {
  case 'PASSAGE':
- return { label: ' Bookmarked Passage', color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.15)' };
+ return { label: 'Bookmarked Passage', color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.15)' };
  case 'SNAPSHOT':
- return { label: ' Character Web Snapshot', color: '#a855f7', bg: 'rgba(168, 85, 247, 0.15)' };
+ return { label: 'Character Web Snapshot', color: '#a855f7', bg: 'rgba(168, 85, 247, 0.15)' };
  case 'ANNOTATION':
- return { label: ' Personal Study Annotation', color: '#10b981', bg: 'rgba(16, 185, 129, 0.15)' };
+ return { label: 'Personal Study Annotation', color: '#10b981', bg: 'rgba(16, 185, 129, 0.15)' };
  default:
- return { label: ' Saved Item', color: 'var(--text-h)', bg: 'var(--code-bg)' };
+ return { label: 'Saved Item', color: 'var(--text-h)', bg: 'var(--code-bg)' };
  }
  };
 

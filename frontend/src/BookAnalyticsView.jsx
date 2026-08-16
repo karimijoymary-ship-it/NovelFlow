@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from 'recharts';
 import { getApiUrl } from './apiConfig';
+import { stripEmoji } from './sanitize';
 
 export default function BookAnalyticsView({ book, onBookUpdated }) {
  const [dna, setDna] = useState({
@@ -31,13 +32,17 @@ export default function BookAnalyticsView({ book, onBookUpdated }) {
  dnaWorldBuild: book.dnaWorldBuild ?? 50
  });
 
- setCustomTags(book.customTags || "");
+ setCustomTags(stripEmoji(book.customTags || ""));
 
- // Parse custom theme scores
+ // Parse custom theme scores and strip emojis from DB keys
  if (book.customThemeScores) {
  try {
  const parsed = JSON.parse(book.customThemeScores);
- setCustomThemeScores(parsed || {});
+ const sanitized = {};
+ Object.entries(parsed || {}).forEach(([k, v]) => {
+ sanitized[stripEmoji(k)] = v;
+ });
+ setCustomThemeScores(sanitized);
  } catch (e) {
  setCustomThemeScores({});
  }
@@ -45,7 +50,7 @@ export default function BookAnalyticsView({ book, onBookUpdated }) {
  // Fallback: convert comma separated thematicElements to initial score 70 map
  const initialMap = {};
  book.thematicElements.split(',').forEach(t => {
- const trimmed = t.trim();
+ const trimmed = stripEmoji(t.trim());
  if (trimmed) initialMap[trimmed] = 70;
  });
  setCustomThemeScores(initialMap);
@@ -69,18 +74,18 @@ export default function BookAnalyticsView({ book, onBookUpdated }) {
  }));
  };
 
- const handleAddCustomTheme = (themeNameInput, scoreInput = 70) => {
- const trimmed = (themeNameInput || newThemeName).trim();
- if (!trimmed) return;
+  const handleAddCustomTheme = (themeNameInput, scoreInput = 70) => {
+    const trimmed = stripEmoji((themeNameInput || newThemeName).trim());
+    if (!trimmed) return;
 
- setCustomThemeScores(prev => ({
- ...prev,
- [trimmed]: scoreInput
- }));
+    setCustomThemeScores(prev => ({
+      ...prev,
+      [trimmed]: scoreInput
+    }));
 
- setNewThemeName("");
- setNewThemeScore(70);
- };
+    setNewThemeName("");
+    setNewThemeScore(70);
+  };
 
  const handleRemoveCustomTheme = (themeName) => {
  setCustomThemeScores(prev => {

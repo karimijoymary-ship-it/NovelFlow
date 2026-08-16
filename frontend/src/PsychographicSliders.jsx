@@ -152,10 +152,6 @@ export default function PsychographicSliders({ book, bookId, userId, onTelemetry
  cursor: 'pointer'
  }}
  >
- {status === 'Reading' && ' '}
- {status === 'Completed' && ' '}
- {status === 'Queue' && ' '}
- {status === 'DNF' && ' '}
  {status}
  </button>
  ))}
