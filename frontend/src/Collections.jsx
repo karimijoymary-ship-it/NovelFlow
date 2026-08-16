@@ -17,6 +17,22 @@ const Collections = () => {
   const [toastMessage, setToastMessage] = useState(null);
   const [showShareModal, setShowShareModal] = useState(false);
   const [shareModalSet, setShareModalSet] = useState(null);
+  const [editingDnaBook, setEditingDnaBook] = useState(null);
+
+  const handleUpdateBookDna = (bookId, newDna) => {
+    fetch(getApiUrl(`/api/books/${bookId}/dna`), {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newDna)
+    })
+      .then(res => res.json())
+      .then(() => {
+        triggerToast("Synced Psychographic DNA with Book Analytics!");
+        setEditingDnaBook(null);
+        fetchBooks();
+      })
+      .catch(console.error);
+  };
 
   // New Set Form State
   const [newSet, setNewSet] = useState({
@@ -578,22 +594,84 @@ const Collections = () => {
                 No books in catalog meet all selected threshold levels. Try lowering one of the sliders above!
               </div>
             ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
-                {getBooksMatchingDna(dnaFilters).map(b => (
-                  <div key={b.bookMasterId} style={{ padding: '16px', background: 'var(--social-bg)', border: '1px solid var(--accent-border)', borderRadius: '10px' }}>
-                    <div style={{ fontWeight: 600, color: 'var(--text-h)', marginBottom: '4px' }}>
-                      {b.editions && b.editions.length > 0 ? b.editions[0].title : `Book #${b.bookMasterId}`}
-                    </div>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--text-light)', marginBottom: '12px' }}>by {b.originalAuthor}</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '16px' }}>
+                {getBooksMatchingDna(dnaFilters).map(b => {
+                  const isEditingThis = editingDnaBook?.bookMasterId === b.bookMasterId;
+                  const title = b.editions && b.editions.length > 0 ? b.editions[0].title : `Book #${b.bookMasterId}`;
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '0.75rem', background: 'var(--bg)', padding: '8px', borderRadius: '6px' }}>
-                      <div>Complexity: <strong>{b.dnaComplexity ?? 50}%</strong></div>
-                      <div>Darkness: <strong>{b.dnaDarkness ?? 50}%</strong></div>
-                      <div>Pacing: <strong>{b.dnaPacing ?? 50}%</strong></div>
-                      <div>World Build: <strong>{b.dnaWorldBuild ?? 50}%</strong></div>
+                  return (
+                    <div key={b.bookMasterId} style={{ padding: '16px', background: 'var(--social-bg)', border: '1px solid var(--accent-border)', borderRadius: '10px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <div>
+                          <div style={{ fontWeight: 700, color: 'var(--text-h)', fontSize: '0.95rem' }}>{title}</div>
+                          <div style={{ fontSize: '0.82rem', color: 'var(--text-light)' }}>by {b.originalAuthor}</div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setEditingDnaBook(isEditingThis ? null : { ...b })}
+                          style={{ padding: '4px 10px', background: 'var(--accent-bg)', color: 'var(--accent)', border: '1px solid var(--accent-border)', borderRadius: '6px', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 600 }}
+                        >
+                          {isEditingThis ? '✕ Close' : '✏️ Tune Analytics DNA'}
+                        </button>
+                      </div>
+
+                      {/* DNA Analytics Synced Badges */}
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '0.78rem', background: 'var(--bg)', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                        <div>🧩 Complexity: <strong style={{ color: '#a855f7' }}>{b.dnaComplexity ?? 50}%</strong></div>
+                        <div>🌑 Darkness: <strong style={{ color: '#ef4444' }}>{b.dnaDarkness ?? 50}%</strong></div>
+                        <div>⚡ Pacing: <strong style={{ color: '#f59e0b' }}>{b.dnaPacing ?? 50}%</strong></div>
+                        <div>🌍 Worldbuild: <strong style={{ color: '#3b82f6' }}>{b.dnaWorldBuild ?? 50}%</strong></div>
+                      </div>
+
+                      {/* Inline DNA Editor Panel */}
+                      {isEditingThis && (
+                        <div className="animate-slide-down" style={{ marginTop: '6px', paddingTop: '10px', borderTop: '1px dashed var(--border)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                          <span style={{ fontSize: '0.78rem', color: 'var(--accent)', fontWeight: 600, textTransform: 'uppercase' }}>
+                            Adjust Saved Book Analytics DNA
+                          </span>
+
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.78rem' }}>
+                            <div>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
+                                <span>Complexity:</span> <strong>{editingDnaBook.dnaComplexity ?? 50}%</strong>
+                              </div>
+                              <input type="range" min="0" max="100" value={editingDnaBook.dnaComplexity ?? 50} onChange={e => setEditingDnaBook({ ...editingDnaBook, dnaComplexity: Number(e.target.value) })} style={{ width: '100%' }} />
+                            </div>
+
+                            <div>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
+                                <span>Darkness:</span> <strong>{editingDnaBook.dnaDarkness ?? 50}%</strong>
+                              </div>
+                              <input type="range" min="0" max="100" value={editingDnaBook.dnaDarkness ?? 50} onChange={e => setEditingDnaBook({ ...editingDnaBook, dnaDarkness: Number(e.target.value) })} style={{ width: '100%' }} />
+                            </div>
+
+                            <div>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
+                                <span>Pacing:</span> <strong>{editingDnaBook.dnaPacing ?? 50}%</strong>
+                              </div>
+                              <input type="range" min="0" max="100" value={editingDnaBook.dnaPacing ?? 50} onChange={e => setEditingDnaBook({ ...editingDnaBook, dnaPacing: Number(e.target.value) })} style={{ width: '100%' }} />
+                            </div>
+
+                            <div>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
+                                <span>Worldbuilding:</span> <strong>{editingDnaBook.dnaWorldBuild ?? 50}%</strong>
+                              </div>
+                              <input type="range" min="0" max="100" value={editingDnaBook.dnaWorldBuild ?? 50} onChange={e => setEditingDnaBook({ ...editingDnaBook, dnaWorldBuild: Number(e.target.value) })} style={{ width: '100%' }} />
+                            </div>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => handleUpdateBookDna(b.bookMasterId, editingDnaBook)}
+                            style={{ padding: '6px 12px', background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '0.8rem', marginTop: '4px' }}
+                          >
+                            💾 Sync with Book Analytics
+                          </button>
+                        </div>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
