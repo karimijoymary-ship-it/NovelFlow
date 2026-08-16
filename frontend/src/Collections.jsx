@@ -721,7 +721,7 @@ const Collections = () => {
  style={{ padding: '6px 12px', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.4)', color: '#f87171', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}
  title="Delete Collection"
  >
-  Delete
+ Delete
  </button>
  <button
  type="button"

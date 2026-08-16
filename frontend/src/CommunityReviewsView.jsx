@@ -301,7 +301,7 @@ export default function CommunityReviewsView({ book, currentUser }) {
  </div>
  </div>
 
- {/*  WRITE A REVIEW FORM PANEL */}
+ {/* WRITE A REVIEW FORM PANEL */}
  {showReviewForm && (
  <div style={{ background: 'var(--bg)', borderRadius: '12px', border: '1px solid var(--accent)', padding: '1.5rem', marginBottom: '1.5rem' }} className="animate-slide-down">
  <h3 style={{ textTransform: 'uppercase', letterSpacing: '1px', fontSize: '0.9rem', color: 'var(--accent)', marginBottom: '1rem', marginTop: 0 }}>

@@ -87,55 +87,55 @@ public class DatabaseSeeder implements CommandLineRunner {
  }
 
  private String stripEmojiJava(String input) {
-     if (input == null) return null;
-     return input.replaceAll("[\\uFE00-\\uFE0F\\u200D]", "")
-                 .replaceAll("[\\uD83C-\\uDBFF][\\uDC00-\\uDFFF]", "")
-                 .replaceAll("[\\u2600-\\u27BF]", "")
-                 .replaceAll("[\\u2300-\\u25FF]", "")
-                 .replaceAll("[⭐★✕✓🎭🏷🔖✍🕸📖📘✅⏳🛑💔🗑🎓🧠👥✨📌☀️🌙💻]", "")
-                 .trim();
+ if (input == null) return null;
+ return input.replaceAll("[\\uFE00-\\uFE0F\\u200D]", "")
+ .replaceAll("[\\uD83C-\\uDBFF][\\uDC00-\\uDFFF]", "")
+ .replaceAll("[\\u2600-\\u27BF]", "")
+ .replaceAll("[\\u2300-\\u25FF]", "")
+ .replaceAll("[]", "")
+ .trim();
  }
 
  private void sanitizeExistingDatabaseRecords() {
-     List<BookMaster> allBooks = bookMasterRepository.findAll();
-     for (BookMaster b : allBooks) {
-         boolean changed = false;
-         if (b.getCustomTags() != null) {
-             String clean = stripEmojiJava(b.getCustomTags());
-             if (!clean.equals(b.getCustomTags())) { b.setCustomTags(clean); changed = true; }
-         }
-         if (b.getThematicElements() != null) {
-             String clean = stripEmojiJava(b.getThematicElements());
-             if (!clean.equals(b.getThematicElements())) { b.setThematicElements(clean); changed = true; }
-         }
-         if (b.getCustomThemeScores() != null) {
-             String clean = stripEmojiJava(b.getCustomThemeScores());
-             if (!clean.equals(b.getCustomThemeScores())) { b.setCustomThemeScores(clean); changed = true; }
-         }
-         if (changed) bookMasterRepository.save(b);
-     }
+ List<BookMaster> allBooks = bookMasterRepository.findAll();
+ for (BookMaster b : allBooks) {
+ boolean changed = false;
+ if (b.getCustomTags() != null) {
+ String clean = stripEmojiJava(b.getCustomTags());
+ if (!clean.equals(b.getCustomTags())) { b.setCustomTags(clean); changed = true; }
+ }
+ if (b.getThematicElements() != null) {
+ String clean = stripEmojiJava(b.getThematicElements());
+ if (!clean.equals(b.getThematicElements())) { b.setThematicElements(clean); changed = true; }
+ }
+ if (b.getCustomThemeScores() != null) {
+ String clean = stripEmojiJava(b.getCustomThemeScores());
+ if (!clean.equals(b.getCustomThemeScores())) { b.setCustomThemeScores(clean); changed = true; }
+ }
+ if (changed) bookMasterRepository.save(b);
+ }
 
-     List<ReadingTelemetry> allTel = readingTelemetryRepository.findAll();
-     for (ReadingTelemetry t : allTel) {
-         if (t.getReadingStatus() != null) {
-             String clean = stripEmojiJava(t.getReadingStatus());
-             if (!clean.equals(t.getReadingStatus())) {
-                 t.setReadingStatus(clean);
-                 readingTelemetryRepository.save(t);
-             }
-         }
-     }
+ List<ReadingTelemetry> allTel = readingTelemetryRepository.findAll();
+ for (ReadingTelemetry t : allTel) {
+ if (t.getReadingStatus() != null) {
+ String clean = stripEmojiJava(t.getReadingStatus());
+ if (!clean.equals(t.getReadingStatus())) {
+ t.setReadingStatus(clean);
+ readingTelemetryRepository.save(t);
+ }
+ }
+ }
 
-     List<BookSet> allSets = bookSetRepository.findAll();
-     for (BookSet s : allSets) {
-         boolean changed = false;
-         if (s.getIcon() != null && !s.getIcon().isEmpty()) { s.setIcon(""); changed = true; }
-         if (s.getName() != null) {
-             String clean = stripEmojiJava(s.getName());
-             if (!clean.equals(s.getName())) { s.setName(clean); changed = true; }
-         }
-         if (changed) bookSetRepository.save(s);
-     }
+ List<BookSet> allSets = bookSetRepository.findAll();
+ for (BookSet s : allSets) {
+ boolean changed = false;
+ if (s.getIcon() != null && !s.getIcon().isEmpty()) { s.setIcon(""); changed = true; }
+ if (s.getName() != null) {
+ String clean = stripEmojiJava(s.getName());
+ if (!clean.equals(s.getName())) { s.setName(clean); changed = true; }
+ }
+ if (changed) bookSetRepository.save(s);
+ }
  }
 
  private void seedBooksAndTelemetry(User admin) {

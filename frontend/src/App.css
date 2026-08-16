@@ -1511,7 +1511,7 @@
  margin: 0;
  }
 
-/*  Manual Book Panel (inline in sidebar)  */
+/* Manual Book Panel (inline in sidebar) */
 .manual-book-panel {
  border: 1px solid var(--accent-border);
  border-radius: 10px;
@@ -1530,7 +1530,7 @@
  margin-bottom: 6px;
 }
 
-/*  Settings Page  */
+/* Settings Page */
 .settings-panel {
  max-width: 700px;
  padding: 2rem;
@@ -1580,7 +1580,7 @@
  color: var(--text);
 }
 
-/*  Theme Toggle Button Group  */
+/* Theme Toggle Button Group */
 .theme-toggle-group {
  display: flex;
  border: 1px solid var(--border);

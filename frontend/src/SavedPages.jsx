@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { stripEmoji } from './sanitize';
 
 const HIGHLIGHT_COLORS = [
  { name: 'Yellow', code: '#fef08a', textCode: '#713f12', borderCode: '#fde047' },
@@ -50,7 +51,17 @@ const DEFAULT_SAVED_ITEMS = [
 const SavedPages = () => {
  const [items, setItems] = useState(() => {
  const saved = localStorage.getItem('novelflow_saved_pages');
- return saved ? JSON.parse(saved) : DEFAULT_SAVED_ITEMS;
+ if (saved) {
+  try {
+    const parsed = JSON.parse(saved);
+    return parsed.map(item => ({
+      ...item,
+      notes: stripEmoji(item.notes),
+      quoteText: stripEmoji(item.quoteText)
+    }));
+  } catch (e) {}
+ }
+ return DEFAULT_SAVED_ITEMS;
  });
 
  const [activeCategory, setActiveCategory] = useState('ALL'); // ALL, PASSAGE, SNAPSHOT, ANNOTATION
@@ -311,7 +322,7 @@ const SavedPages = () => {
  style={{ background: 'transparent', border: 'none', color: '#ef4444', fontSize: '0.85rem', cursor: 'pointer' }}
  title="Delete Entry"
  >
-  Delete
+ Delete
  </button>
  </div>
 
@@ -344,7 +355,7 @@ const SavedPages = () => {
  {item.screenshotUrl && (
  <div style={{ marginTop: '8px' }}>
  <div style={{ fontSize: '0.8rem', color: 'var(--text-light)', marginBottom: '6px', fontWeight: 600 }}>
-  Attached Screenshot:
+ Attached Screenshot:
  </div>
  <img 
  src={item.screenshotUrl} 

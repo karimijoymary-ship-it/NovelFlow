@@ -391,7 +391,7 @@ export default function AdminDashboardView() {
  onClick={() => deleteAdminReview(rev.reviewId, rev.reviewerName)}
  style={{ padding: '4px 10px', background: '#ef4444', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '0.78rem' }}
  >
-  Delete Review
+ Delete Review
  </button>
  </div>
  </div>
