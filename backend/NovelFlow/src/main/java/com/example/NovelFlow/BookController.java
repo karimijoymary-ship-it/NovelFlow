@@ -553,49 +553,69 @@ public class BookController {
     }
 
     @PostMapping("/manual")
-    public ResponseEntity<BookMaster> saveManualBook(@RequestBody ManualBookRequest request) {
-        String uuid = UUID.randomUUID().toString();
-        String masterId = "manual_" + uuid;
+    @Transactional
+    public ResponseEntity<?> saveManualBook(@RequestBody ManualBookRequest request) {
+        try {
+            if (request.getTitle() == null || request.getTitle().trim().isEmpty() ||
+                request.getAuthor() == null || request.getAuthor().trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Title and Author are required."));
+            }
 
-        BookMaster bm = new BookMaster();
-        bm.setBookMasterId(masterId);
-        bm.setOriginalAuthor(request.getAuthor() != null && !request.getAuthor().trim().isEmpty() ? request.getAuthor()
-                : "Unknown Author");
-        bm.setOriginalReleaseYear(request.getReleaseYear());
-        bm.setCalculatedAverageRating(0.0);
-        bm.setSynopsis(request.getSynopsis() != null ? request.getSynopsis() : "");
-        bm.setIsVerified(false);
-        BookMaster savedBm = bookMasterRepository.save(bm);
+            String cleanTitle = request.getTitle().trim();
+            String cleanAuthor = request.getAuthor().trim();
 
-        if (savedBm.getSynopsis() != null && !savedBm.getSynopsis().trim().isEmpty()) {
-            characterExtractorService.extractAndSaveCharacters(savedBm, savedBm.getSynopsis());
+            String shortUuid = UUID.randomUUID().toString().replace("-", "");
+            String masterId = "man_" + shortUuid.substring(0, 16);
+            String editionId = "ed_man_" + shortUuid.substring(0, 16);
+
+            BookMaster bm = new BookMaster();
+            bm.setBookMasterId(masterId);
+            bm.setOriginalAuthor(cleanAuthor.length() > 100 ? cleanAuthor.substring(0, 100) : cleanAuthor);
+            bm.setOriginalReleaseYear(request.getReleaseYear() != null ? request.getReleaseYear() : 2026);
+            bm.setCalculatedAverageRating(0.0);
+            bm.setSynopsis(request.getSynopsis() != null ? request.getSynopsis().trim() : "");
+            bm.setIsVerified(false);
+            bm.setCustomTags("#ManualEntry");
+            bm.setThematicElements("User Added Literature");
+
+            BookMaster savedBm = bookMasterRepository.save(bm);
+
+            // Clean ISBN & guarantee length <= 13 and uniqueness
+            String rawIsbn = request.getIsbnBarcode() != null ? request.getIsbnBarcode().replaceAll("[^0-9X]", "") : "";
+            String cleanIsbn = rawIsbn;
+            if (cleanIsbn.isEmpty() || cleanIsbn.length() > 13 || bookEditionRepository.findByIsbnBarcode(cleanIsbn).isPresent()) {
+                cleanIsbn = "999" + String.format("%010d", Math.abs(UUID.randomUUID().hashCode() % 10000000000L));
+                while (bookEditionRepository.findByIsbnBarcode(cleanIsbn).isPresent()) {
+                    cleanIsbn = "999" + String.format("%010d", Math.abs(UUID.randomUUID().hashCode() % 10000000000L));
+                }
+            }
+
+            BookEdition edition = new BookEdition();
+            edition.setEditionId(editionId);
+            edition.setBookMaster(savedBm);
+            edition.setLanguageTag(request.getLanguageTag() != null && !request.getLanguageTag().trim().isEmpty() ? request.getLanguageTag().trim().toLowerCase() : "en");
+            edition.setTitle(cleanTitle.length() > 255 ? cleanTitle.substring(0, 255) : cleanTitle);
+            edition.setIsbnBarcode(cleanIsbn);
+
+            edition = bookEditionRepository.save(edition);
+
+            List<BookEdition> editions = new ArrayList<>();
+            editions.add(edition);
+            savedBm.setEditions(editions);
+
+            if (savedBm.getSynopsis() != null && !savedBm.getSynopsis().trim().isEmpty()) {
+                try {
+                    characterExtractorService.extractAndSaveCharacters(savedBm, savedBm.getSynopsis());
+                } catch (Exception e) {
+                    System.err.println("Character extraction skipped for manual book: " + e.getMessage());
+                }
+            }
+
+            return ResponseEntity.ok(savedBm);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body(Map.of("error", "Failed to save book: " + e.getMessage()));
         }
-
-        BookEdition edition = new BookEdition();
-        edition.setEditionId("edition_manual_" + uuid);
-        edition.setBookMaster(savedBm);
-        edition.setLanguageTag(request.getLanguageTag() != null && !request.getLanguageTag().trim().isEmpty()
-                ? request.getLanguageTag()
-                : "en");
-        edition.setTitle(
-                request.getTitle() != null && !request.getTitle().trim().isEmpty() ? request.getTitle() : "Untitled");
-
-        String isbn = request.getIsbnBarcode();
-        if (isbn == null || isbn.trim().isEmpty()) {
-            int hashCode = Math.abs(uuid.hashCode());
-            isbn = String.format("999%010d", hashCode);
-            if (isbn.length() > 13)
-                isbn = isbn.substring(0, 13);
-        }
-        edition.setIsbnBarcode(isbn);
-
-        edition = bookEditionRepository.save(edition);
-
-        List<BookEdition> editions = new ArrayList<>();
-        editions.add(edition);
-        savedBm.setEditions(editions);
-
-        return ResponseEntity.ok(savedBm);
     }
 
     @PostMapping("/{id}/telemetry")

@@ -33,11 +33,15 @@ const ManualBookForm = ({ onClose, onSuccess }) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     })
-      .then(res => {
-        if (!res.ok) throw new Error('Failed to create book manually.');
+      .then(async res => {
+        if (!res.ok) {
+          const errBody = await res.json().catch(() => ({}));
+          throw new Error(errBody.error || 'Failed to create book manually.');
+        }
         return res.json();
       })
       .then(data => {
+        setLoading(false);
         onSuccess(data);
       })
       .catch(err => {
