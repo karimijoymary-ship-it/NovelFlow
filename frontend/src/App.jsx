@@ -11,6 +11,8 @@ import BookAnalyticsView from './BookAnalyticsView';
 import AdminDashboardView from './AdminDashboardView';
 import Collections from './Collections';
 import CommunityReviewsView from './CommunityReviewsView';
+import CatalogView from './CatalogView';
+import UserGuideModal from './UserGuideModal';
 import { getApiUrl } from './apiConfig';
 
 // Apply saved theme on load
@@ -26,6 +28,7 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [isAddingManually, setIsAddingManually] = useState(false);
+  const [showGuideModal, setShowGuideModal] = useState(false);
   const [activeGlobalView, setActiveGlobalView] = useState('Discovery');
   const [theme, setTheme] = useState(() => localStorage.getItem('novelflow_theme') || 'system');
   const [user, setUser] = useState(() => {
@@ -172,9 +175,30 @@ function App() {
 
   return (
     <div className="app-container">
-      <Sidebar activeView={activeGlobalView} onViewChange={setActiveGlobalView} user={user} onLogout={handleLogout} />
+      <Sidebar
+        activeView={activeGlobalView}
+        onViewChange={setActiveGlobalView}
+        user={user}
+        onLogout={handleLogout}
+        onOpenGuide={() => setShowGuideModal(true)}
+      />
 
-      {activeGlobalView === 'Discovery' ? (
+      {showGuideModal && (
+        <UserGuideModal onClose={() => setShowGuideModal(false)} />
+      )}
+
+      {activeGlobalView === 'Catalog' ? (
+        <CatalogView
+          onSelectBook={(book) => {
+            setSelectedBook(book);
+            setActiveGlobalView('Discovery');
+          }}
+          onAddManual={() => {
+            setActiveGlobalView('Discovery');
+            setIsAddingManually(true);
+          }}
+        />
+      ) : activeGlobalView === 'Discovery' ? (
         <React.Fragment>
           {/* Sidebar - Book Selector */}
           <aside className="sidebar">

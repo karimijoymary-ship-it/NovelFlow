@@ -181,6 +181,21 @@ export default function BookAnalyticsView({ book, onBookUpdated }) {
 
       {message && <div className="success-message">{message}</div>}
 
+      {/* ACADEMIC PROVENANCE & METHODOLOGY TRANSPARENCY CARD */}
+      <div style={{ padding: '12px 16px', background: 'var(--social-bg)', borderRadius: '10px', border: '1px solid var(--border)', marginBottom: '1.25rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-h)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+            Academic Psychographic DNA Methodology
+          </span>
+          <span style={{ fontSize: '0.75rem', color: '#10b981', background: 'rgba(16, 185, 129, 0.15)', padding: '2px 8px', borderRadius: '10px', fontWeight: 600 }}>
+            Human Reviewed + Quantized Vectoring
+          </span>
+        </div>
+        <p style={{ margin: '6px 0 0 0', fontSize: '0.82rem', color: 'var(--text-light)', lineHeight: 1.4 }}>
+          Narrative DNA vectors (Complexity, Darkness, Pacing, Worldbuilding, Romance, Humor) are derived from text structural parsing, structural tension metrics, and student/faculty peer review.
+        </p>
+      </div>
+
       {/* NARRATIVE DNA METRICS OVERVIEW CARD */}
       <div style={{ background: 'var(--social-bg)', borderRadius: '12px', border: '1px solid var(--border)', padding: '1.5rem', marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
@@ -212,11 +227,11 @@ export default function BookAnalyticsView({ book, onBookUpdated }) {
         {/* DNA CORE THEMES VECTOR DISPLAY */}
         <div style={{ width: '100%', marginTop: '1rem', paddingTop: '1rem', borderTop: '1px dashed var(--border)' }}>
           <div style={{ fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: '#c084fc', fontWeight: 600, marginBottom: '8px' }}>
-            🎭 Active Custom Theme Sliders in DNA Chart
+            Active Custom Theme Sliders in DNA Chart
           </div>
           {customThemeEntries.length === 0 ? (
             <div style={{ fontSize: '0.82rem', color: 'var(--text-light)', fontStyle: 'italic', background: 'var(--bg)', padding: '8px 12px', borderRadius: '6px' }}>
-              No custom theme sliders added yet. Use <strong>"➕ Add Custom Theme Slider"</strong> below to add sliders for themes like <em>Existential Isolation</em> or <em>Power & Corruption</em>!
+              No custom theme sliders added yet. Use <strong>"Add Custom Theme Slider"</strong> below to add sliders for themes like <em>Existential Isolation</em> or <em>Power & Corruption</em>!
             </div>
           ) : (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>

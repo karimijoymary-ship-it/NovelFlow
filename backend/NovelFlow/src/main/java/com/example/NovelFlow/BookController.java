@@ -933,6 +933,7 @@ public class BookController {
         review.setRating(request.getRating() != null ? Math.min(5.0, Math.max(1.0, request.getRating())) : 5.0);
         review.setReviewTitle(request.getReviewTitle() != null ? request.getReviewTitle() : "Community Review");
         review.setReviewText(request.getReviewText() != null ? request.getReviewText() : "");
+        review.setParentReviewId(request.getParentReviewId());
         review.setHelpfulCount(0);
         review.setCreatedAt(LocalDateTime.now());
 
@@ -1026,6 +1027,7 @@ public class BookController {
         private Double rating;
         private String reviewTitle;
         private String reviewText;
+        private String parentReviewId;
 
         public String getReviewerName() { return reviewerName; }
         public void setReviewerName(String reviewerName) { this.reviewerName = reviewerName; }
@@ -1041,5 +1043,8 @@ public class BookController {
 
         public String getReviewText() { return reviewText; }
         public void setReviewText(String reviewText) { this.reviewText = reviewText; }
+
+        public String getParentReviewId() { return parentReviewId; }
+        public void setParentReviewId(String parentReviewId) { this.parentReviewId = parentReviewId; }
     }
 }

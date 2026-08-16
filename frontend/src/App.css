@@ -145,16 +145,38 @@
   flex-direction: column;
   gap: 20px;
   box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 .main-content {
   flex-grow: 1;
-  padding: 40px;
+  padding: 32px;
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  gap: 24px;
   box-sizing: border-box;
   overflow-y: auto;
+  min-width: 0;
+}
+
+@media (max-width: 1024px) {
+  .app-container {
+    flex-direction: column;
+  }
+  .global-sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding: 16px;
+  }
+  .sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+  .main-content {
+    padding: 20px 16px;
+  }
 }
 
 /* Sidebar Styling */

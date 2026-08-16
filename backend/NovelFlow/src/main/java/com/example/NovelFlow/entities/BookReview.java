@@ -40,7 +40,18 @@ public class BookReview {
     @Column(name = "is_flagged")
     private Boolean isFlagged = false;
 
+    @Column(name = "parent_review_id")
+    private String parentReviewId;
+
     public BookReview() {}
+
+    public String getParentReviewId() {
+        return parentReviewId;
+    }
+
+    public void setParentReviewId(String parentReviewId) {
+        this.parentReviewId = parentReviewId;
+    }
 
     public Boolean getIsFlagged() {
         return isFlagged;

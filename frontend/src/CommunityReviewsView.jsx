@@ -19,6 +19,11 @@ export default function CommunityReviewsView({ book, currentUser }) {
   const [message, setMessage] = useState(null);
   const [error, setError] = useState(null);
 
+  // Threaded Reply State
+  const [replyingReviewId, setReplyingReviewId] = useState(null);
+  const [replyText, setReplyText] = useState('');
+  const [submittingReply, setSubmittingReply] = useState(false);
+
   useEffect(() => {
     if (currentUser) {
       setReviewerName(currentUser.fullName || '');
@@ -136,6 +141,40 @@ export default function CommunityReviewsView({ book, currentUser }) {
         setTimeout(() => setMessage(null), 3000);
       })
       .catch(console.error);
+  };
+
+  const handlePostReply = (parentReviewId) => {
+    if (!replyText.trim()) return;
+
+    setSubmittingReply(true);
+    const payload = {
+      reviewerName: reviewerName.trim() || 'Anonymous Reader',
+      reviewerStream: reviewerStream.trim() || 'General Literature',
+      rating: 5.0,
+      reviewTitle: 'Reply',
+      reviewText: replyText.trim(),
+      parentReviewId
+    };
+
+    fetch(getApiUrl(`/api/books/${book.bookMasterId}/reviews`), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+      .then(res => {
+        if (!res.ok) throw new Error("Failed to post reply.");
+        return res.json();
+      })
+      .then(savedReply => {
+        setSubmittingReply(false);
+        setReplyText('');
+        setReplyingReviewId(null);
+        fetchReviews();
+      })
+      .catch(err => {
+        setSubmittingReply(false);
+        console.error(err);
+      });
   };
 
   if (!book) return null;
@@ -388,14 +427,13 @@ export default function CommunityReviewsView({ book, currentUser }) {
         </div>
       </div>
 
-      {/* REVIEWS LIST */}
+      {/* REVIEWS LIST & THREADED REPLIES */}
       {loading ? (
         <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-light)' }}>
           Loading community reviews...
         </div>
-      ) : filtered.length === 0 ? (
+      ) : filtered.filter(r => !r.parentReviewId).length === 0 ? (
         <div style={{ padding: '3rem 1.5rem', textAlign: 'center', background: 'var(--social-bg)', borderRadius: '12px', border: '1px dashed var(--border)' }}>
-          <div style={{ fontSize: '2rem', marginBottom: '8px' }}>💬</div>
           <h4 style={{ margin: '0 0 6px 0', color: 'var(--text-h)' }}>No Community Reviews Yet</h4>
           <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-light)' }}>Be the first reader to submit a review for this book!</p>
           <button
@@ -403,18 +441,21 @@ export default function CommunityReviewsView({ book, currentUser }) {
             onClick={() => setShowReviewForm(true)}
             style={{ marginTop: '1rem', padding: '8px 16px', background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: 600, cursor: 'pointer' }}
           >
-            ✍️ Write First Review
+            Write First Review
           </button>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {filtered.map(rev => {
+          {filtered.filter(r => !r.parentReviewId).map(rev => {
             const initials = (rev.reviewerName || 'A R')
               .split(' ')
               .map(n => n[0])
               .join('')
               .toUpperCase()
               .substring(0, 2);
+
+            const childReplies = reviews.filter(c => c.parentReviewId === rev.reviewId);
+            const isReplying = replyingReviewId === rev.reviewId;
 
             return (
               <div
@@ -438,7 +479,7 @@ export default function CommunityReviewsView({ book, currentUser }) {
                         width: '36px',
                         height: '36px',
                         borderRadius: '50%',
-                        background: 'linear-gradient(135deg, var(--accent), #a855f7)',
+                        background: 'linear-gradient(135deg, var(--accent), #6366f1)',
                         color: '#fff',
                         display: 'flex',
                         alignItems: 'center',
@@ -454,7 +495,7 @@ export default function CommunityReviewsView({ book, currentUser }) {
                         {rev.reviewerName}
                       </div>
                       <div style={{ fontSize: '0.75rem', color: 'var(--accent)' }}>
-                        🎓 {rev.reviewerStream || 'General Literature'}
+                        {rev.reviewerStream || 'General Literature'}
                       </div>
                     </div>
                   </div>
@@ -479,12 +520,12 @@ export default function CommunityReviewsView({ book, currentUser }) {
                   {rev.reviewText}
                 </p>
 
-                {/* HELPFUL & FLAGGING FOOTER */}
+                {/* FOOTER ACTIONS */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '8px', borderTop: '1px dashed var(--border)' }}>
                   <div>
                     {rev.isFlagged ? (
                       <span style={{ fontSize: '0.75rem', color: '#ef4444', background: 'rgba(239, 68, 68, 0.15)', padding: '2px 8px', borderRadius: '10px', fontWeight: 600 }}>
-                        🚩 Flagged for Admin Review
+                        Flagged for Admin Review
                       </span>
                     ) : (
                       <span style={{ fontSize: '0.75rem', color: 'var(--text-light)' }}>
@@ -511,10 +552,30 @@ export default function CommunityReviewsView({ book, currentUser }) {
                         fontWeight: 600
                       }}
                     >
-                      <span>👍 Helpful</span>
+                      <span>Helpful</span>
                       <span style={{ color: 'var(--accent)', fontFamily: 'var(--mono)', fontWeight: 700 }}>
                         {rev.helpfulCount || 0}
                       </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setReplyingReviewId(isReplying ? null : rev.reviewId);
+                        setReplyText('');
+                      }}
+                      style={{
+                        background: 'var(--accent-bg)',
+                        border: '1px solid var(--accent-border)',
+                        borderRadius: '16px',
+                        padding: '4px 12px',
+                        fontSize: '0.78rem',
+                        color: 'var(--accent)',
+                        cursor: 'pointer',
+                        fontWeight: 600
+                      }}
+                    >
+                      {isReplying ? 'Cancel Reply' : 'Reply'}
                     </button>
 
                     {!rev.isFlagged && (
@@ -532,7 +593,7 @@ export default function CommunityReviewsView({ book, currentUser }) {
                         }}
                         title="Flag inappropriate review for administrator"
                       >
-                        🚩 Flag
+                        Flag
                       </button>
                     )}
 
@@ -545,7 +606,7 @@ export default function CommunityReviewsView({ book, currentUser }) {
                             onClick={() => handleUnflag(rev.reviewId)}
                             style={{ padding: '4px 8px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}
                           >
-                            ✅ Dismiss Flag
+                            Dismiss Flag
                           </button>
                         )}
                         <button
@@ -553,12 +614,66 @@ export default function CommunityReviewsView({ book, currentUser }) {
                           onClick={() => handleAdminDelete(rev.reviewId)}
                           style={{ padding: '4px 8px', background: '#ef4444', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}
                         >
-                          🗑️ Delete
+                          Delete
                         </button>
                       </div>
                     )}
                   </div>
                 </div>
+
+                {/* INLINE THREADED REPLY FORM */}
+                {isReplying && (
+                  <div style={{ marginTop: '8px', padding: '12px', background: 'var(--bg)', borderRadius: '8px', border: '1px solid var(--accent-border)' }} className="animate-slide-down">
+                    <span style={{ fontSize: '0.78rem', color: 'var(--accent)', fontWeight: 600, display: 'block', marginBottom: '6px', textTransform: 'uppercase' }}>
+                      Reply to {rev.reviewerName}'s Review:
+                    </span>
+                    <textarea
+                      rows="2"
+                      value={replyText}
+                      onChange={e => setReplyText(e.target.value)}
+                      placeholder="Write your thoughtful analysis or response..."
+                      style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--social-bg)', color: 'var(--text-h)', outline: 'none', fontSize: '0.85rem' }}
+                    />
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '8px' }}>
+                      <button
+                        type="button"
+                        onClick={() => setReplyingReviewId(null)}
+                        style={{ padding: '4px 10px', background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-light)', borderRadius: '6px', fontSize: '0.78rem', cursor: 'pointer' }}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        disabled={submittingReply}
+                        onClick={() => handlePostReply(rev.reviewId)}
+                        style={{ padding: '4px 14px', background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer' }}
+                      >
+                        {submittingReply ? 'Posting...' : 'Post Reply'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* NESTED THREADED REPLIES */}
+                {childReplies.length > 0 && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px', paddingLeft: '1.25rem', borderLeft: '2px solid var(--accent-border)' }}>
+                    {childReplies.map(child => (
+                      <div key={child.reviewId} style={{ background: 'var(--bg)', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                          <span style={{ fontWeight: 700, fontSize: '0.82rem', color: 'var(--text-h)' }}>
+                            {child.reviewerName} <span style={{ fontSize: '0.72rem', color: 'var(--accent)', fontWeight: 400 }}>({child.reviewerStream || 'Literature'})</span>
+                          </span>
+                          <span style={{ fontSize: '0.72rem', color: 'var(--text-light)' }}>
+                            {new Date(child.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                          </span>
+                        </div>
+                        <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--text)', lineHeight: 1.4 }}>
+                          {child.reviewText}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
               </div>
             );

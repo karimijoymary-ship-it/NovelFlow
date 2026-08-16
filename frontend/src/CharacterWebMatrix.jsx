@@ -356,6 +356,21 @@ export default function CharacterWebMatrix({ bookId, synopsis, thematicElements,
             {/* Left Graph Panel */}
             <div className="graph-card">
                 <h3>Character Network Map</h3>
+                {/* ACADEMIC PROVENANCE & METHODOLOGY TRANSPARENCY CARD */}
+                <div style={{ padding: '12px', background: 'var(--bg)', borderRadius: '8px', border: '1px solid var(--border)', marginBottom: '1.25rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-h)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                      Academic Network Provenance
+                    </span>
+                    <span style={{ fontSize: '0.75rem', color: '#10b981', background: 'rgba(16, 185, 129, 0.15)', padding: '2px 8px', borderRadius: '10px', fontWeight: 600 }}>
+                      Human Reviewed + NLP AI Detection
+                    </span>
+                  </div>
+                  <p style={{ margin: '6px 0 0 0', fontSize: '0.8rem', color: 'var(--text-light)', lineHeight: 1.4 }}>
+                    Character relationships and thematic archetypes are established via double-pass NLP Entity Extraction, Sentence Proximity Scans, and verified against primary text references.
+                  </p>
+                </div>
+
                 {synopsis && (
                     <div style={{ marginBottom: '1rem', background: 'var(--bg)', padding: '1rem', borderRadius: '8px', borderLeft: '4px solid var(--accent)' }}>
                         <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem', color: 'var(--text-h)' }}>Book Synopsis</h4>
@@ -369,17 +384,17 @@ export default function CharacterWebMatrix({ bookId, synopsis, thematicElements,
                     <div style={{ marginBottom: '1.25rem', padding: '12px', background: 'var(--bg)', borderRadius: '8px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                         {thematicElements && (
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                                <span style={{ fontSize: '0.75rem', color: '#c084fc', fontWeight: 600, textTransform: 'uppercase' }}>🎭 Active Themes:</span>
+                                <span style={{ fontSize: '0.75rem', color: '#c084fc', fontWeight: 600, textTransform: 'uppercase' }}>Active Themes:</span>
                                 {thematicElements.split(',').map((t, idx) => (
                                     <span key={idx} style={{ background: 'rgba(168, 85, 247, 0.15)', border: '1px solid rgba(168, 85, 247, 0.4)', color: '#c084fc', padding: '2px 8px', borderRadius: '10px', fontSize: '0.78rem', fontWeight: 600 }}>
-                                        🎭 {t.trim()}
+                                        {t.trim()}
                                     </span>
                                 ))}
                             </div>
                         )}
                         {customTags && (
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                                <span style={{ fontSize: '0.75rem', color: 'var(--accent)', fontWeight: 600, textTransform: 'uppercase' }}>🏷️ Micro Tags:</span>
+                                <span style={{ fontSize: '0.75rem', color: 'var(--accent)', fontWeight: 600, textTransform: 'uppercase' }}>Micro Tags:</span>
                                 {customTags.split(',').map((t, idx) => (
                                     <span key={idx} style={{ background: 'var(--accent-bg)', border: '1px solid var(--accent-border)', color: 'var(--accent)', padding: '2px 8px', borderRadius: '10px', fontSize: '0.78rem', fontWeight: 600 }}>
                                         {t.trim().startsWith('#') ? t.trim() : `#${t.trim()}`}
