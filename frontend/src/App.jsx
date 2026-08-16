@@ -464,9 +464,15 @@ function App() {
               </header>
               <section className="tab-panel" style={{ marginTop: '20px' }}>
                 <PsychographicSliders
+                  book={selectedBook}
                   bookId={selectedBook.bookMasterId}
                   userId={user.userId}
-                  onTelemetryUpdated={handleTelemetryUpdated}
+                  onTelemetryUpdated={(updated) => {
+                    if (updated && updated.bookMasterId) {
+                      setSelectedBook(updated);
+                      setBooks(prev => prev.map(b => b.bookMasterId === updated.bookMasterId ? updated : b));
+                    }
+                  }}
                 />
               </section>
             </div>

@@ -401,7 +401,6 @@ const Collections = () => {
         {[
           { id: 'ALL', label: '📚 All Collections', count: sets.length },
           { id: 'COURSE', label: '🎓 Course Syllabi', count: sets.filter(s => s.setType === 'COURSE').length },
-          { id: 'LANGUAGE_ALIGNMENT', label: '🌐 Language Alignments', count: sets.filter(s => s.setType === 'LANGUAGE_ALIGNMENT').length },
           { id: 'PSYCHOGRAPHIC_PRESET', label: '🧠 Psychographic DNA', count: sets.filter(s => s.setType === 'PSYCHOGRAPHIC_PRESET').length },
           { id: 'CUSTOM_TAG', label: '🏷️ Custom Tags', count: getAllTags().length },
           { id: 'SHARED_LIST', label: '👥 Collaborative Lists', count: sets.filter(s => s.setType === 'SHARED_LIST').length }
@@ -734,47 +733,7 @@ const Collections = () => {
             </div>
           )}
 
-          {/* LANGUAGE ALIGNMENT SPECIFIC VIEW */}
-          {selectedSet.setType === 'LANGUAGE_ALIGNMENT' && (
-            <div>
-              <h3 style={{ margin: '0 0 12px 0', fontSize: '1.1rem', color: 'var(--text-h)' }}>🌐 Side-by-Side Parallel Edition Comparison</h3>
-              <p style={{ color: 'var(--text-light)', fontSize: '0.85rem', marginBottom: '16px' }}>
-                Compare original master editions directly alongside regional Swahili translations to analyze linguistic syntax and cultural adaptations.
-              </p>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                {/* Original Track */}
-                <div style={{ background: 'var(--bg)', padding: '16px', borderRadius: '8px', border: '1px solid var(--border)' }}>
-                  <h4 style={{ margin: '0 0 12px 0', color: 'var(--accent)' }}>🇬🇧 English Original Master Track</h4>
-                  {books.filter(b => b.editions && b.editions.some(e => e.languageTag === 'en')).map(b => {
-                    const enEd = b.editions.find(e => e.languageTag === 'en');
-                    return (
-                      <div key={b.bookMasterId} style={{ padding: '12px', background: 'var(--social-bg)', borderRadius: '6px', marginBottom: '10px', border: '1px solid var(--border)' }}>
-                        <div style={{ fontWeight: 600, color: 'var(--text-h)' }}>{enEd ? enEd.title : 'Untitled'}</div>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-light)' }}>Author: {b.originalAuthor} ({b.originalReleaseYear})</div>
-                        <div style={{ fontSize: '0.75rem', fontFamily: 'var(--mono)', color: 'var(--accent)', marginTop: '4px' }}>ISBN: {enEd ? enEd.isbnBarcode : 'N/A'}</div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Regional Swahili Translation Track */}
-                <div style={{ background: 'var(--bg)', padding: '16px', borderRadius: '8px', border: '1px solid var(--border)' }}>
-                  <h4 style={{ margin: '0 0 12px 0', color: '#10b981' }}>🇰🇪 Regional Swahili Translation Track</h4>
-                  {books.filter(b => b.editions && b.editions.some(e => e.languageTag === 'sw')).map(b => {
-                    const swEd = b.editions.find(e => e.languageTag === 'sw');
-                    return (
-                      <div key={b.bookMasterId} style={{ padding: '12px', background: 'rgba(16, 185, 129, 0.05)', borderRadius: '6px', marginBottom: '10px', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
-                        <div style={{ fontWeight: 600, color: '#34d399' }}>{swEd ? swEd.title : 'Tafsiri Ya Swahili'}</div>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-light)' }}>Tafsiri ya Kiswahili / Regional Companion</div>
-                        <div style={{ fontSize: '0.75rem', fontFamily: 'var(--mono)', color: '#10b981', marginTop: '4px' }}>ISBN: {swEd ? swEd.isbnBarcode : 'N/A'}</div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* COLLABORATIVE & SHARED LIST SPECIFIC VIEW */}
           {selectedSet.setType === 'SHARED_LIST' && (
@@ -930,7 +889,6 @@ const Collections = () => {
                   style={{ width: '100%', padding: '8px 10px', border: '1px solid var(--border)', borderRadius: '6px', background: 'var(--bg)', color: 'var(--text-h)', fontSize: '0.9rem', outline: 'none' }}
                 >
                   <option value="COURSE">🎓 Course & Curriculum Syllabus</option>
-                  <option value="LANGUAGE_ALIGNMENT">🌐 Language Alignment Set</option>
                   <option value="PSYCHOGRAPHIC_PRESET">🧠 Psychographic DNA Preset</option>
                   <option value="CUSTOM_TAG">🏷️ Custom Tags Taxonomy Cluster</option>
                   <option value="SHARED_LIST">👥 Collaborative / Shared Reading List</option>
