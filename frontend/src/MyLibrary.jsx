@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { getApiUrl } from './apiConfig';
 
 const MyLibrary = ({ user }) => {
   const [telemetries, setTelemetries] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const activeUserId = (user && (user.userId || user.id)) || 'user_1';
+
   useEffect(() => {
-    if (!user?.userId) return;
-    fetch(`/api/books/user-library?userId=${user.userId}`)
+    fetch(getApiUrl(`/api/books/user-library?userId=${activeUserId}`))
       .then(res => res.json())
       .then(data => {
         setTelemetries(data || []);
@@ -16,7 +18,7 @@ const MyLibrary = ({ user }) => {
         console.error('Failed to load library:', err);
         setLoading(false);
       });
-  }, [user]);
+  }, [activeUserId]);
 
   const reading = telemetries.filter(t => t.readingStatus === 'Reading');
   const queue = telemetries.filter(t => t.readingStatus === 'Queue');

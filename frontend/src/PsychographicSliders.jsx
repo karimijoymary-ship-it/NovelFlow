@@ -12,44 +12,51 @@ export default function PsychographicSliders({ book, bookId, userId, onTelemetry
   const [message, setMessage] = useState(null);
   const [error, setError] = useState(null);
 
+  const effectiveUserId = userId || 'user_1';
+  const targetId = bookId || (book && book.bookMasterId);
+
   // Fetch telemetry for current book and user
   useEffect(() => {
-    const targetId = bookId || (book && book.bookMasterId);
-    if (!targetId || !userId) return;
+    if (!targetId) return;
 
     setLoading(true);
     setError(null);
     setMessage(null);
 
-    fetch(getApiUrl(`/api/books/${targetId}/telemetry?userId=${userId}`))
+    fetch(getApiUrl(`/api/books/${targetId}/telemetry?userId=${effectiveUserId}`))
       .then((res) => {
         if (!res.ok) throw new Error('Failed to load telemetry data');
         return res.json();
       })
       .then((data) => {
-        setReadingStatus(data.readingStatus || 'Reading');
-        setPagesCompleted(data.pagesCompleted || 0);
-        setFractionalRating(data.fractionalRating || 0.0);
-        setDnfReason(data.dnfReason || '');
+        if (data) {
+          setReadingStatus(data.readingStatus || 'Reading');
+          setPagesCompleted(data.pagesCompleted !== undefined && data.pagesCompleted !== null ? data.pagesCompleted : 0);
+          setFractionalRating(data.fractionalRating !== undefined && data.fractionalRating !== null ? data.fractionalRating : 0.0);
+          setDnfReason(data.dnfReason || '');
+        }
         setLoading(false);
       })
       .catch((err) => {
         setError(err.message);
         setLoading(false);
       });
-  }, [book, bookId, userId]);
+  }, [targetId, effectiveUserId]);
 
   // Handle telemetry submission
   const handleSave = (e) => {
     e.preventDefault();
+    if (!targetId) {
+      setError("No book selected to save reading stats.");
+      return;
+    }
+
     setSaving(true);
     setError(null);
     setMessage(null);
 
-    const targetId = bookId || (book && book.bookMasterId);
-
     const payload = {
-      userId,
+      userId: effectiveUserId,
       readingStatus,
       pagesCompleted: parseInt(pagesCompleted, 10) || 0,
       fractionalRating: parseFloat(fractionalRating) || 0.0,
@@ -69,11 +76,11 @@ export default function PsychographicSliders({ book, bookId, userId, onTelemetry
       })
       .then((updatedBook) => {
         setSaving(false);
-        setMessage('Reading telemetry updated successfully!');
+        setMessage(`Saved progress: ${pagesCompleted} pages (${readingStatus})!`);
         if (onTelemetryUpdated) {
           onTelemetryUpdated(updatedBook);
         }
-        setTimeout(() => setMessage(null), 2500);
+        setTimeout(() => setMessage(null), 3000);
       })
       .catch((err) => {
         setSaving(false);
@@ -92,7 +99,7 @@ export default function PsychographicSliders({ book, bookId, userId, onTelemetry
         <span
           key={i}
           className={`star ${isFilled ? 'filled' : isHalf ? 'half-filled' : ''}`}
-          style={{ cursor: 'pointer' }}
+          style={{ cursor: 'pointer', fontSize: '1.4rem', marginRight: '4px', color: isFilled ? '#f59e0b' : 'var(--border)' }}
           onClick={() => setFractionalRating(i)}
         >
           ★
@@ -127,75 +134,84 @@ export default function PsychographicSliders({ book, bookId, userId, onTelemetry
         {/* Status Selector */}
         <div className="input-group">
           <label className="group-label">Reading Status</label>
-          <div className="status-selector">
-            <button
-              type="button"
-              className={`status-btn ${readingStatus === 'Reading' ? 'active reading' : ''}`}
-              onClick={() => setReadingStatus('Reading')}
-            >
-              Reading
-            </button>
-            <button
-              type="button"
-              className={`status-btn ${readingStatus === 'Completed' ? 'active completed' : ''}`}
-              onClick={() => setReadingStatus('Completed')}
-            >
-              Completed
-            </button>
-            <button
-              type="button"
-              className={`status-btn ${readingStatus === 'Queue' ? 'active queue' : ''}`}
-              onClick={() => setReadingStatus('Queue')}
-            >
-              Queue
-            </button>
-            <button
-              type="button"
-              className={`status-btn ${readingStatus === 'DNF' ? 'active dnf' : ''}`}
-              onClick={() => setReadingStatus('DNF')}
-            >
-              DNF
-            </button>
+          <div className="status-selector" style={{ display: 'flex', gap: '8px' }}>
+            {['Reading', 'Completed', 'Queue', 'DNF'].map(status => (
+              <button
+                key={status}
+                type="button"
+                className={`status-btn ${readingStatus === status ? 'active ' + status.toLowerCase() : ''}`}
+                onClick={() => setReadingStatus(status)}
+                style={{
+                  flex: 1,
+                  padding: '10px',
+                  borderRadius: '8px',
+                  border: readingStatus === status ? '2px solid var(--accent)' : '1px solid var(--border)',
+                  background: readingStatus === status ? 'var(--accent-bg)' : 'var(--bg)',
+                  color: readingStatus === status ? 'var(--accent)' : 'var(--text-h)',
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                {status === 'Reading' && '📖 '}
+                {status === 'Completed' && '✅ '}
+                {status === 'Queue' && '⏳ '}
+                {status === 'DNF' && '🛑 '}
+                {status}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Pages Completed Slider */}
+        {/* Pages Completed Input & Slider */}
         <div className="input-group">
-          <div className="slider-header">
-            <label className="group-label">Pages Completed</label>
-            <span className="slider-value">{pagesCompleted} pages</span>
+          <div className="slider-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+            <label className="group-label" style={{ fontWeight: 600, color: 'var(--text-h)' }}>Pages Completed</label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <input
+                type="number"
+                min="0"
+                max="5000"
+                value={pagesCompleted}
+                onChange={(e) => setPagesCompleted(Math.max(0, parseInt(e.target.value, 10) || 0))}
+                style={{ width: '80px', padding: '4px 8px', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-h)', fontWeight: 700, fontFamily: 'var(--mono)', textAlign: 'right', outline: 'none' }}
+              />
+              <span style={{ fontSize: '0.85rem', color: 'var(--text-light)' }}>pages</span>
+            </div>
           </div>
           <input
             type="range"
             min="0"
             max="1200"
-            value={pagesCompleted}
-            onChange={(e) => setPagesCompleted(e.target.value)}
+            value={Math.min(1200, pagesCompleted)}
+            onChange={(e) => setPagesCompleted(parseInt(e.target.value, 10) || 0)}
             className="custom-range"
+            style={{ width: '100%', cursor: 'pointer' }}
           />
-          <div className="progress-bar-container">
+          <div className="progress-bar-container" style={{ height: '8px', background: 'var(--bg)', borderRadius: '4px', overflow: 'hidden', marginTop: '6px' }}>
             <div
               className="progress-bar-fill"
-              style={{ width: `${Math.min(100, (pagesCompleted / 1200) * 100)}%` }}
+              style={{ width: `${Math.min(100, (pagesCompleted / 1200) * 100)}%`, height: '100%', background: 'var(--accent)', borderRadius: '4px', transition: 'width 0.2s ease' }}
             ></div>
           </div>
         </div>
 
         {/* Rating stars */}
         <div className="input-group">
-          <div className="slider-header">
-            <label className="group-label">Personal Influence Rating</label>
-            <span className="slider-value rating-highlight">{fractionalRating.toFixed(1)} / 5.0</span>
+          <div className="slider-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+            <label className="group-label" style={{ fontWeight: 600, color: 'var(--text-h)' }}>Personal Influence Rating</label>
+            <span className="slider-value rating-highlight" style={{ fontWeight: 700, color: '#f59e0b', fontFamily: 'var(--mono)' }}>
+              {fractionalRating.toFixed(1)} / 5.0
+            </span>
           </div>
-          <div className="rating-stars">
+          <div className="rating-stars" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
             {renderStars()}
             <button
               type="button"
               style={{
                 background: 'none',
                 border: 'none',
-                color: 'var(--text)',
-                fontSize: '13px',
+                color: 'var(--text-light)',
+                fontSize: '12px',
                 cursor: 'pointer',
                 marginLeft: '12px'
               }}
@@ -209,7 +225,9 @@ export default function PsychographicSliders({ book, bookId, userId, onTelemetry
         {/* DNF Reason (only if DNF is selected) */}
         {readingStatus === 'DNF' && (
           <div className="input-group animate-slide-down">
-            <label className="group-label" htmlFor="dnfReason">Why did you decide to DNF (Did Not Finish)?</label>
+            <label className="group-label" htmlFor="dnfReason" style={{ fontWeight: 600, color: 'var(--text-h)', marginBottom: '6px', display: 'block' }}>
+              Why did you decide to DNF (Did Not Finish)?
+            </label>
             <textarea
               id="dnfReason"
               className="custom-textarea"
@@ -217,13 +235,19 @@ export default function PsychographicSliders({ book, bookId, userId, onTelemetry
               placeholder="Provide a critical commentary or reason..."
               value={dnfReason}
               onChange={(e) => setDnfReason(e.target.value)}
+              style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-h)', outline: 'none' }}
               required
             ></textarea>
           </div>
         )}
 
-        <button type="submit" className="btn-primary" disabled={saving}>
-          {saving ? <span className="spinner small"></span> : '💾 Save Academic Telemetry'}
+        <button
+          type="submit"
+          className="btn-primary"
+          disabled={saving}
+          style={{ padding: '12px 20px', background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 700, fontSize: '0.95rem', cursor: saving ? 'not-allowed' : 'pointer' }}
+        >
+          {saving ? 'Saving Progress...' : '💾 Save Academic Telemetry'}
         </button>
       </form>
     </div>
