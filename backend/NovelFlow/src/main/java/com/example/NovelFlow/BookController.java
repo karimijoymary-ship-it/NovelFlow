@@ -564,6 +564,18 @@ public class BookController {
             String cleanTitle = request.getTitle().trim();
             String cleanAuthor = request.getAuthor().trim();
 
+            // Auto-find existing book in catalog if title matches case-insensitively
+            List<BookMaster> existingMasters = bookMasterRepository.findAll();
+            for (BookMaster existingBm : existingMasters) {
+                if (existingBm.getEditions() != null) {
+                    for (BookEdition ed : existingBm.getEditions()) {
+                        if (ed.getTitle() != null && ed.getTitle().equalsIgnoreCase(cleanTitle)) {
+                            return ResponseEntity.ok(existingBm);
+                        }
+                    }
+                }
+            }
+
             String shortUuid = UUID.randomUUID().toString().replace("-", "");
             String masterId = "man_" + shortUuid.substring(0, 16);
             String editionId = "ed_man_" + shortUuid.substring(0, 16);

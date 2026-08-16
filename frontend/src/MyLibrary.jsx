@@ -53,22 +53,36 @@ const MyLibrary = ({ user }) => {
     try {
       let targetBookMasterId = selectedBookId;
 
-      // If user typed a manual title/author instead of choosing an existing book
+      // If user typed a manual title/author instead of choosing from dropdown
       if (!targetBookMasterId && manualTitle.trim() && manualAuthor.trim()) {
-        const manualRes = await fetch(getApiUrl('/api/books/manual'), {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            title: manualTitle.trim(),
-            author: manualAuthor.trim(),
-            releaseYear: 2026,
-            synopsis: 'Completed book logged via My Library'
-          })
+        const queryTitle = manualTitle.trim().toLowerCase();
+        // Check if book already exists in catalog
+        const match = booksCatalog.find(b => {
+          const t = getTitle(b).toLowerCase();
+          return t.includes(queryTitle) || queryTitle.includes(t);
         });
 
-        if (!manualRes.ok) throw new Error('Failed to register manual book.');
-        const createdBook = await manualRes.json();
-        targetBookMasterId = createdBook.bookMasterId;
+        if (match) {
+          targetBookMasterId = match.bookMasterId;
+        } else {
+          const manualRes = await fetch(getApiUrl('/api/books/manual'), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              title: manualTitle.trim(),
+              author: manualAuthor.trim(),
+              releaseYear: 2026,
+              synopsis: 'Completed book logged via My Library'
+            })
+          });
+
+          if (!manualRes.ok) {
+            const errBody = await manualRes.json().catch(() => ({}));
+            throw new Error(errBody.error || 'Failed to register manual book.');
+          }
+          const createdBook = await manualRes.json();
+          targetBookMasterId = createdBook.bookMasterId;
+        }
       }
 
       if (!targetBookMasterId) {

@@ -1,0 +1,3 @@
+2026-08-16 18:09:42.010087+03:00 jdbc[118]: exception
+org.h2.jdbc.JdbcSQLDataException: Value too long for column "EDITION_ID CHARACTER VARYING(50)": "'edition_manual_75cbf284-c166-40c2-ac4d-a3d79cb7a4b4' (51)"; SQL statement:
+insert into book_edition (book_master_id,isbn_barcode,language_tag,title,edition_id) values (?,?,?,?,?) [22001-240]
