@@ -57,20 +57,23 @@ public class DatabaseSeeder implements CommandLineRunner {
  @Override
  @Transactional
  public void run(String... args) throws Exception {
- Optional<User> existingAdmin = userRepository.findByEmail("admin@example.com");
- User admin;
- if (existingAdmin.isEmpty()) {
- admin = new User();
- admin.setUserId("user_admin");
- } else {
- admin = existingAdmin.get();
- }
- admin.setFullName("System Administrator");
- admin.setEmail("admin@example.com");
- admin.setAcademicStream("Systems Operation");
- admin.setPasswordHash(passwordEncoder.encode("admin123"));
- admin.setRole("admin");
- userRepository.save(admin);
+  Optional<User> existingAdmin = userRepository.findByEmail("admin@gmail.com");
+  if (existingAdmin.isEmpty()) {
+  existingAdmin = userRepository.findByEmail("admin@example.com");
+  }
+  User admin;
+  if (existingAdmin.isEmpty()) {
+  admin = new User();
+  admin.setUserId("user_admin");
+  } else {
+  admin = existingAdmin.get();
+  }
+  admin.setFullName("System Administrator");
+  admin.setEmail("admin@gmail.com");
+  admin.setAcademicStream("Systems Operation");
+  admin.setPasswordHash(passwordEncoder.encode("admin123"));
+  admin.setRole("admin");
+  userRepository.save(admin);
 
  if (bookMasterRepository.count() == 0 || !bookMasterRepository.existsById("book_11")) {
  seedBooksAndTelemetry(admin);
