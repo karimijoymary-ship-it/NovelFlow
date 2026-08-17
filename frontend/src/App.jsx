@@ -306,7 +306,7 @@ function App() {
  <div className="book-card-meta">
  <span className="release-year">{book.originalReleaseYear}</span>
  <span className="rating-star-badge">
- {book.calculatedAverageRating ? book.calculatedAverageRating.toFixed(1) : '0.0'}
+ ★ {book.calculatedAverageRating ? book.calculatedAverageRating.toFixed(1) : '0.0'}
  </span>
  </div>
  </div>
@@ -335,7 +335,7 @@ function App() {
  >
  <div className="rating-big-value">
  {selectedBook.calculatedAverageRating ? selectedBook.calculatedAverageRating.toFixed(1) : '0.0'}
- <span></span>
+ <span style={{ color: '#f59e0b', marginLeft: '4px' }}>★</span>
  </div>
  <div className="rating-label">Community Rating (Click for Reviews)</div>
  </div>

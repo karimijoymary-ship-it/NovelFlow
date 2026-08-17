@@ -224,7 +224,7 @@ export default function CommunityReviewsView({ book, currentUser }) {
  transition: 'transform 0.15s ease, color 0.15s ease'
  }}
  >
- 
+ {isFilled ? '★' : '☆'}
  </span>
  );
  }

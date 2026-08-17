@@ -102,7 +102,7 @@ export default function PsychographicSliders({ book, bookId, userId, onTelemetry
  style={{ cursor: 'pointer', fontSize: '1.4rem', marginRight: '4px', color: isFilled ? '#f59e0b' : 'var(--border)' }}
  onClick={() => setFractionalRating(i)}
  >
- 
+ {isFilled ? '★' : isHalf ? '★' : '☆'}
  </span>
  );
  }
