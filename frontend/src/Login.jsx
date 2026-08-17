@@ -2,59 +2,64 @@ import React, { useState } from 'react';
 import { getApiUrl } from './apiConfig';
 
 function Login({ onLoginSuccess }) {
- const [isRegister, setIsRegister] = useState(false);
- const [email, setEmail] = useState('');
- const [password, setPassword] = useState('');
- const [fullName, setFullName] = useState('');
- const [academicStream, setAcademicStream] = useState('');
- const [loading, setLoading] = useState(false);
- const [error, setError] = useState(null);
- const [success, setSuccess] = useState(null);
+  const [isRegister, setIsRegister] = useState(false);
+  const [email, setEmail] = useState(() => localStorage.getItem('novelflow_remembered_email') || '');
+  const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [academicStream, setAcademicStream] = useState('');
+  const [rememberMe, setRememberMe] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
 
- const handleSubmit = (e) => {
- e.preventDefault();
- setLoading(true);
- setError(null);
- setSuccess(null);
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
 
- const url = getApiUrl(isRegister ? '/api/auth/register' : '/api/auth/login');
- const payload = isRegister
- ? { email, password, fullName, academicStream }
- : { email, password };
+    const url = getApiUrl(isRegister ? '/api/auth/register' : '/api/auth/login');
+    const payload = isRegister
+      ? { email: email.trim(), password, fullName: fullName.trim(), academicStream: academicStream.trim() }
+      : { email: email.trim(), password };
 
- fetch(url, {
- method: 'POST',
- headers: {
- 'Content-Type': 'application/json',
- },
- body: JSON.stringify(payload),
- })
- .then((res) => {
- if (!res.ok) {
- return res.json().catch(() => ({ message: `Server error (${res.status})` })).then((data) => {
- throw new Error(data.message || 'Authentication failed');
- });
- }
- return res.json();
- })
- .then((data) => {
- setLoading(false);
- if (isRegister) {
- setSuccess('Account created successfully! Switching to Login...');
- setTimeout(() => {
- setIsRegister(false);
- setError(null);
- setSuccess(null);
- }, 1500);
- } else {
- onLoginSuccess(data);
- }
- })
- .catch((err) => {
- setLoading(false);
- setError(err.message);
- });
- };
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    })
+      .then((res) => {
+        if (!res.ok) {
+          return res.json().catch(() => ({ message: `Server error (${res.status})` })).then((data) => {
+            throw new Error(data.message || 'Authentication failed');
+          });
+        }
+        return res.json();
+      })
+      .then((data) => {
+        setLoading(false);
+        if (rememberMe && email) {
+          localStorage.setItem('novelflow_remembered_email', email.trim());
+        } else {
+          localStorage.removeItem('novelflow_remembered_email');
+        }
+
+        if (isRegister) {
+          setSuccess('Account created successfully! Entering dashboard...');
+          setTimeout(() => {
+            onLoginSuccess(data);
+          }, 800);
+        } else {
+          onLoginSuccess(data);
+        }
+      })
+      .catch((err) => {
+        setLoading(false);
+        setError(err.message);
+      });
+  };
 
  return (
  <div className="login-page">
@@ -138,6 +143,19 @@ function Login({ onLoginSuccess }) {
  required
  />
  </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', color: 'var(--text-light)', margin: '4px 0 12px 0' }}>
+          <input
+            id="rememberMe"
+            type="checkbox"
+            checked={rememberMe}
+            onChange={(e) => setRememberMe(e.target.checked)}
+            style={{ cursor: 'pointer', accentColor: 'var(--accent)' }}
+          />
+          <label htmlFor="rememberMe" style={{ cursor: 'pointer', userSelect: 'none' }}>
+            Remember email & save login session
+          </label>
+        </div>
 
  <button type="submit" className="login-submit-btn" disabled={loading}>
  {loading ? (
