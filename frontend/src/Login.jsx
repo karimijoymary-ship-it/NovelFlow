@@ -166,16 +166,11 @@ function Login({ onLoginSuccess }) {
  </button>
  </form>
 
- <div className="login-footer">
-        {!isRegister ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '0.82rem', textAlign: 'center' }}>
-            <div>Admin login: <code style={{ cursor: 'pointer', color: 'var(--accent)', fontWeight: 600 }} onClick={() => { setEmail('admin@gmail.com'); setPassword('admin123'); }}>admin@gmail.com / admin123</code></div>
-            <div>Student login: <code style={{ cursor: 'pointer', color: 'var(--accent)', fontWeight: 600 }} onClick={() => { setEmail('alice@example.com'); setPassword('password123'); }}>alice@example.com / password123</code></div>
-          </div>
-        ) : (
-          <p>Fill out the fields to register a new local user node.</p>
-        )}
- </div>
+      <div className="login-footer">
+        <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-light)', textAlign: 'center' }}>
+          NovelFlow Academic & Literary Analytics Platform
+        </p>
+      </div>
  </div>
  </div>
  );
