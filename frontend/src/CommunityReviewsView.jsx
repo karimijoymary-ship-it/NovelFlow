@@ -12,6 +12,7 @@ export default function CommunityReviewsView({ book, currentUser }) {
  // New Review Form State
  const [reviewerName, setReviewerName] = useState('');
  const [reviewerStream, setReviewerStream] = useState('');
+ const [bookTitleInput, setBookTitleInput] = useState('');
  const [rating, setRating] = useState(5.0);
  const [hoverRating, setHoverRating] = useState(0);
  const [reviewTitle, setReviewTitle] = useState('');
@@ -30,6 +31,13 @@ export default function CommunityReviewsView({ book, currentUser }) {
  setReviewerStream(currentUser.academicStream || 'General Literature');
  }
  }, [currentUser]);
+
+ useEffect(() => {
+ if (book) {
+ const defaultTitle = book.editions && book.editions.length > 0 ? book.editions[0].title : `Book #${book.bookMasterId}`;
+ setBookTitleInput(defaultTitle);
+ }
+ }, [book]);
 
  const fetchReviews = () => {
  if (!book) return;
@@ -344,16 +352,30 @@ export default function CommunityReviewsView({ book, currentUser }) {
  </div>
  </div>
 
- <div>
- <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text)', textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px' }}>Review Title / Headline</label>
- <input
- type="text"
- value={reviewTitle}
- onChange={e => setReviewTitle(e.target.value)}
- placeholder="e.g. Masterpiece on resilience & female autonomy"
- style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--social-bg)', color: 'var(--text-h)', outline: 'none' }}
- />
- </div>
+  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+    <div>
+      <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text)', textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px' }}>Book Title / Work Reviewed *</label>
+      <input
+        type="text"
+        value={bookTitleInput}
+        onChange={e => setBookTitleInput(e.target.value)}
+        placeholder="e.g. Blossoms of the Savannah"
+        style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--social-bg)', color: 'var(--text-h)', outline: 'none', fontWeight: 600 }}
+        required
+      />
+    </div>
+
+    <div>
+      <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text)', textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px' }}>Review Title / Headline</label>
+      <input
+        type="text"
+        value={reviewTitle}
+        onChange={e => setReviewTitle(e.target.value)}
+        placeholder="e.g. Masterpiece on resilience & female autonomy"
+        style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--social-bg)', color: 'var(--text-h)', outline: 'none' }}
+      />
+    </div>
+  </div>
 
  <div>
  <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text)', textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px' }}>Review Comments & Analysis</label>
@@ -506,6 +528,12 @@ export default function CommunityReviewsView({ book, currentUser }) {
  {new Date(rev.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
  </div>
  </div>
+ </div>
+
+ {/* BOOK TITLE BADGE */}
+ <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'var(--accent-bg)', border: '1px solid var(--accent-border)', color: 'var(--accent)', padding: '4px 10px', borderRadius: '8px', fontSize: '0.82rem', fontWeight: 600, width: 'fit-content' }}>
+   <span>📖 Book:</span>
+   <span>{bookTitleInput || (book.editions?.[0]?.title || `Book #${book.bookMasterId}`)}</span>
  </div>
 
  {/* REVIEW TITLE */}
