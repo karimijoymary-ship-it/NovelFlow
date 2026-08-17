@@ -9,11 +9,20 @@ export default function AdminDashboardView() {
  const [activeTab, setActiveTab] = useState('catalog');
  const [users, setUsers] = useState([]);
  const [loadingUsers, setLoadingUsers] = useState(false);
+ const [userError, setUserError] = useState(null);
+ const [userSearchQuery, setUserSearchQuery] = useState('');
+ const [userRoleFilter, setUserRoleFilter] = useState('ALL');
  const [unverifiedBooks, setUnverifiedBooks] = useState([]);
  const [allReviews, setAllReviews] = useState([]);
  const [loadingReviews, setLoadingReviews] = useState(false);
  const [latencyData, setLatencyData] = useState([]);
  const [offlineCounts, setOfflineCounts] = useState({ telemetry: 0, tags: 0 });
+
+ useEffect(() => {
+   fetchUsers();
+   fetchUnverified();
+   fetchAdminReviews();
+ }, []);
 
  useEffect(() => {
  if (activeTab === 'community') {
@@ -76,14 +85,19 @@ export default function AdminDashboardView() {
 
  const fetchUsers = () => {
  setLoadingUsers(true);
+ setUserError(null);
  fetch(getApiUrl('/api/users'))
- .then(res => res.json())
+ .then(res => {
+ if (!res.ok) throw new Error("Failed to load user directory from server.");
+ return res.json();
+ })
  .then(data => {
- setUsers(data);
+ setUsers(data || []);
  setLoadingUsers(false);
  })
  .catch(err => {
  console.error("Failed to fetch users", err);
+ setUserError(err.message);
  setLoadingUsers(false);
  });
  };
@@ -231,56 +245,146 @@ export default function AdminDashboardView() {
  )}
 
  {activeTab === 'community' && (
- <div style={{ background: 'var(--social-bg)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border)' }}>
- <h3 style={{ marginBottom: '1rem' }}>Platform User Directory</h3>
- {loadingUsers ? (
- <p>Loading community users...</p>
- ) : (
- <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
- <thead>
- <tr style={{ borderBottom: '1px solid var(--border)', color: 'var(--text-light)' }}>
- <th style={{ padding: '0.75rem' }}>User ID</th>
- <th style={{ padding: '0.75rem' }}>Full Name</th>
- <th style={{ padding: '0.75rem' }}>Email</th>
- <th style={{ padding: '0.75rem' }}>Academic Stream</th>
- <th style={{ padding: '0.75rem' }}>Role</th>
- <th style={{ padding: '0.75rem' }}>Actions</th>
- </tr>
- </thead>
- <tbody>
- {users.map(u => (
- <tr key={u.userId} style={{ borderBottom: '1px solid var(--border)' }}>
- <td style={{ padding: '0.75rem', fontFamily: 'var(--mono)', fontSize: '0.8rem' }}>{u.userId}</td>
- <td style={{ padding: '0.75rem', fontWeight: 600 }}>{u.fullName}</td>
- <td style={{ padding: '0.75rem' }}>{u.email}</td>
- <td style={{ padding: '0.75rem' }}>{u.academicStream}</td>
- <td style={{ padding: '0.75rem' }}>
- <span style={{ 
- padding: '2px 8px', 
- borderRadius: '12px', 
- fontSize: '0.75rem', 
- fontWeight: 600,
- background: u.role === 'admin' ? 'rgba(233, 30, 99, 0.15)' : 'rgba(33, 150, 243, 0.15)',
- color: u.role === 'admin' ? '#E91E63' : '#2196F3'
- }}>
- {u.role}
- </span>
- </td>
- <td style={{ padding: '0.75rem' }}>
- {u.role === 'user' ? (
- <button onClick={() => promoteUser(u.userId, 'admin')} style={{ padding: '4px 8px', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.75rem' }}>
- Promote to Admin
- </button>
- ) : (
- <span style={{ color: 'var(--text-light)', fontSize: '0.8rem' }}>Administrator</span>
- )}
- </td>
- </tr>
- ))}
- </tbody>
- </table>
- )}
- </div>
+    <div style={{ background: 'var(--social-bg)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border)' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
+        <div>
+          <h3 style={{ margin: 0 }}>Platform User Directory</h3>
+          <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: 'var(--text-light)' }}>
+            Manage registered accounts, view academic streams, and assign administrator roles.
+          </p>
+        </div>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <button
+            type="button"
+            onClick={fetchUsers}
+            style={{ padding: '6px 12px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text-h)', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}
+          >
+            ↻ Refresh Directory
+          </button>
+        </div>
+      </div>
+
+      {/* FILTER & SEARCH CONTROLS */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', background: 'var(--bg)', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border)', flexWrap: 'wrap', gap: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '0.78rem', color: 'var(--text-light)', textTransform: 'uppercase', fontWeight: 600 }}>Role Filter:</span>
+          {['ALL', 'admin', 'reader'].map(f => (
+            <button
+              key={f}
+              type="button"
+              onClick={() => setUserRoleFilter(f)}
+              style={{
+                padding: '4px 10px',
+                borderRadius: '12px',
+                fontSize: '0.78rem',
+                fontWeight: userRoleFilter === f ? 700 : 400,
+                border: userRoleFilter === f ? '1px solid var(--accent)' : '1px solid var(--border)',
+                background: userRoleFilter === f ? 'var(--accent-bg)' : 'transparent',
+                color: userRoleFilter === f ? 'var(--accent)' : 'var(--text)',
+                cursor: 'pointer'
+              }}
+            >
+              {f === 'ALL' ? `All (${users.length})` : f === 'admin' ? `Admins (${users.filter(u => u.role === 'admin').length})` : `Readers (${users.filter(u => u.role !== 'admin').length})`}
+            </button>
+          ))}
+        </div>
+
+        <div style={{ flex: 1, maxWidth: '280px' }}>
+          <input
+            type="text"
+            value={userSearchQuery}
+            onChange={e => setUserSearchQuery(e.target.value)}
+            placeholder="Search by name, email, stream..."
+            style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--social-bg)', color: 'var(--text-h)', fontSize: '0.85rem', outline: 'none' }}
+          />
+        </div>
+      </div>
+
+      {userError && (
+        <div className="error-message" style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span>{userError}</span>
+          <button type="button" onClick={fetchUsers} style={{ padding: '4px 10px', background: 'rgba(255,255,255,0.2)', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.78rem' }}>Retry</button>
+        </div>
+      )}
+
+      {loadingUsers ? (
+        <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-light)' }}>
+          Loading community users...
+        </div>
+      ) : (
+        (() => {
+          const filteredUsers = users.filter(u => {
+            const matchesRole = userRoleFilter === 'ALL' || (userRoleFilter === 'admin' ? u.role === 'admin' : u.role !== 'admin');
+            const q = userSearchQuery.trim().toLowerCase();
+            const matchesQuery = !q || (
+              (u.fullName && u.fullName.toLowerCase().includes(q)) ||
+              (u.email && u.email.toLowerCase().includes(q)) ||
+              (u.academicStream && u.academicStream.toLowerCase().includes(q)) ||
+              (u.userId && u.userId.toLowerCase().includes(q))
+            );
+            return matchesRole && matchesQuery;
+          });
+
+          if (filteredUsers.length === 0) {
+            return (
+              <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-light)', background: 'var(--bg)', borderRadius: '8px', border: '1px dashed var(--border)' }}>
+                No registered users found matching the filter criteria.
+              </div>
+            );
+          }
+
+          return (
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid var(--border)', color: 'var(--text-light)' }}>
+                    <th style={{ padding: '0.75rem' }}>User ID</th>
+                    <th style={{ padding: '0.75rem' }}>Full Name</th>
+                    <th style={{ padding: '0.75rem' }}>Email</th>
+                    <th style={{ padding: '0.75rem' }}>Academic Stream</th>
+                    <th style={{ padding: '0.75rem' }}>Role</th>
+                    <th style={{ padding: '0.75rem' }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredUsers.map(u => (
+                    <tr key={u.userId} style={{ borderBottom: '1px solid var(--border)' }}>
+                      <td style={{ padding: '0.75rem', fontFamily: 'var(--mono)', fontSize: '0.8rem' }}>{u.userId}</td>
+                      <td style={{ padding: '0.75rem', fontWeight: 600, color: 'var(--text-h)' }}>{u.fullName || 'Anonymous User'}</td>
+                      <td style={{ padding: '0.75rem' }}>{u.email}</td>
+                      <td style={{ padding: '0.75rem', color: 'var(--accent)' }}>{u.academicStream || 'General Literature'}</td>
+                      <td style={{ padding: '0.75rem' }}>
+                        <span style={{ 
+                          padding: '2px 8px', 
+                          borderRadius: '12px', 
+                          fontSize: '0.75rem', 
+                          fontWeight: 600,
+                          background: u.role === 'admin' ? 'rgba(233, 30, 99, 0.15)' : 'rgba(33, 150, 243, 0.15)',
+                          color: u.role === 'admin' ? '#E91E63' : '#2196F3'
+                        }}>
+                          {u.role || 'reader'}
+                        </span>
+                      </td>
+                      <td style={{ padding: '0.75rem' }}>
+                        {u.role === 'admin' ? (
+                          <button onClick={() => promoteUser(u.userId, 'reader')} style={{ padding: '4px 10px', background: 'var(--bg)', color: 'var(--text-h)', border: '1px solid var(--border)', borderRadius: '4px', cursor: 'pointer', fontSize: '0.75rem' }}>
+                            Set as Reader
+                          </button>
+                        ) : (
+                          <button onClick={() => promoteUser(u.userId, 'admin')} style={{ padding: '4px 10px', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>
+                            Promote to Admin
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          );
+        })()
+      )}
+    </div>
  )}
 
  {/* REVIEWS MODERATION TAB */}

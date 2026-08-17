@@ -28,6 +28,7 @@ public class User {
     @Column(name = "role", length = 20)
     private String role = "reader";
 
+    @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<ReadingTelemetry> telemetryRecords;
 
