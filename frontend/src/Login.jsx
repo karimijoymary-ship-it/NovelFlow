@@ -149,13 +149,14 @@ function Login({ onLoginSuccess }) {
  </form>
 
  <div className="login-footer">
- {!isRegister ? (
- <p>
- Demo credentials: <code style={{ cursor: 'pointer' }} onClick={() => { setEmail('alice@example.com'); setPassword('password123'); }}>alice@example.com / password123</code>
- </p>
- ) : (
- <p>Fill out the fields to register a new local user node.</p>
- )}
+        {!isRegister ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '0.82rem', textAlign: 'center' }}>
+            <div>Admin login: <code style={{ cursor: 'pointer', color: 'var(--accent)', fontWeight: 600 }} onClick={() => { setEmail('admin@gmail.com'); setPassword('admin123'); }}>admin@gmail.com / admin123</code></div>
+            <div>Student login: <code style={{ cursor: 'pointer', color: 'var(--accent)', fontWeight: 600 }} onClick={() => { setEmail('alice@example.com'); setPassword('password123'); }}>alice@example.com / password123</code></div>
+          </div>
+        ) : (
+          <p>Fill out the fields to register a new local user node.</p>
+        )}
  </div>
  </div>
  </div>

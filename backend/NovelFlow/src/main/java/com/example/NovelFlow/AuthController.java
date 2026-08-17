@@ -26,11 +26,16 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        Optional<User> userOpt = userRepository.findByEmail(request.getEmail());
+        String email = request.getEmail() != null ? request.getEmail().trim().toLowerCase() : "";
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            userOpt = userRepository.findAll().stream()
+                    .filter(u -> u.getEmail() != null && u.getEmail().trim().equalsIgnoreCase(email))
+                    .findFirst();
+        }
         if (userOpt.isPresent()) {
             User user = userOpt.get();
             if (passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
-                // Return user details upon successful login
                 return ResponseEntity.ok(user);
             }
         }
